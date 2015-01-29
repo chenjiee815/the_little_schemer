@@ -1,0 +1,549 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>13. What Is the Value of All of This? &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="prev" title="12. ... and Again, and Again, and Again ..." href="chapter_09.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_09.html" title="12. ... and Again, and Again, and Again ..."
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="what-is-the-value-of-all-of-this">
+<h1><a class="toc-backref" href="#id28">13. What Is the Value of All of This?</a><a class="headerlink" href="#what-is-the-value-of-all-of-this" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#what-is-the-value-of-all-of-this" id="id28">What Is the Value of All of This?</a><ul>
+<li><a class="reference internal" href="#entry" id="id29">entry</a><ul>
+<li><a class="reference internal" href="#new-entry" id="id30">new-entry</a></li>
+<li><a class="reference internal" href="#lookup-in-entry" id="id31">lookup-in-entry</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#table" id="id32">table</a><ul>
+<li><a class="reference internal" href="#extend-table" id="id33">extend-table</a></li>
+<li><a class="reference internal" href="#lookup-in-table" id="id34">lookup-in-table</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#scheme" id="id35">简化版Scheme解释器</a><ul>
+<li><a class="reference internal" href="#expression-to-action" id="id36">expression-to-action</a></li>
+<li><a class="reference internal" href="#atom-to-action" id="id37">atom-to-action</a></li>
+<li><a class="reference internal" href="#list-to-action" id="id38">list-to-action</a></li>
+<li><a class="reference internal" href="#value" id="id39">value</a></li>
+<li><a class="reference internal" href="#const" id="id40">*const</a></li>
+<li><a class="reference internal" href="#quote" id="id41">*quote</a></li>
+<li><a class="reference internal" href="#identfier" id="id42">*identfier</a></li>
+<li><a class="reference internal" href="#lambda" id="id43">*lambda</a></li>
+<li><a class="reference internal" href="#cond" id="id44">*cond</a></li>
+<li><a class="reference internal" href="#application" id="id45">*application</a></li>
+<li><a class="reference internal" href="#apply" id="id46">apply</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id27" id="id47">结语</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>本章基于前面几章节的基础，
+引入了table这个数据结构，
+
+然后用Scheme实现了一个简化版本的Scheme解释器（自身实现自身，亦叫自举）。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>王垠前辈也写过一篇：怎样写一个解释器（没有原文地址，搜索即可）。</p>
+<p class="last">讲的内容差不多，也是比较好理解，如果对英文没耐心的，可以参考他的文章。</p>
+</div>
+<div class="section" id="entry">
+<h2><a class="toc-backref" href="#id29">13.1. entry</a><a class="headerlink" href="#entry" title="Permalink to this headline">¶</a></h2>
+<p>entry是这样一种数据结构：</p>
+<div class="highlight-python"><div class="highlight"><pre>它是一个点对，里面包含两个长度相同的子列表。
+
+第一个子列表中的所有S表达式各不相同（即为一个集合）。
+</pre></div>
+</div>
+<div class="section" id="new-entry">
+<h3><a class="toc-backref" href="#id30">13.1.1. new-entry</a><a class="headerlink" href="#new-entry" title="Permalink to this headline">¶</a></h3>
+<p>生成一个entry数据结构</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; build在第7章节定义过，用来生成点对</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">new-entry</span> <span class="nv">build</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lookup-in-entry">
+<h3><a class="toc-backref" href="#id31">13.1.2. lookup-in-entry</a><a class="headerlink" href="#lookup-in-entry" title="Permalink to this headline">¶</a></h3>
+<p>根据name在entry中查找对应的值。</p>
+<p>entry-f用来处理在entry中不存在name的情况。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">lookup-in-entry</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span> <span class="nv">entry</span> <span class="nv">entry-f</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">lookup-in-entry-help</span> <span class="nv">name</span>
+                          <span class="p">(</span><span class="nf">first</span> <span class="nv">entry</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">second</span> <span class="nv">entry</span><span class="p">)</span>
+                          <span class="nv">entry-f</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">lookup-in-entry-help</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span> <span class="nv">names</span> <span class="nv">values</span> <span class="nv">entry-f</span><span class="p">))</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">names</span><span class="p">)</span> <span class="p">(</span><span class="nf">entry-f</span> <span class="nv">name</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">names</span><span class="p">)</span> <span class="nv">name</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">car </span><span class="nv">values</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">lookup-in-entry-help</span> <span class="nv">name</span>
+                                 <span class="p">(</span><span class="nb">cdr </span><span class="nv">names</span><span class="p">)</span>
+                                 <span class="p">(</span><span class="nb">cdr </span><span class="nv">values</span><span class="p">)</span>
+                                 <span class="nv">entry-f</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="table">
+<h2><a class="toc-backref" href="#id32">13.2. table</a><a class="headerlink" href="#table" title="Permalink to this headline">¶</a></h2>
+<p>也叫环境(environment)。它是这样一种数据结构：</p>
+<div class="highlight-python"><div class="highlight"><pre>它是一个列表，里面所有的S表达式都为entry。
+</pre></div>
+</div>
+<div class="section" id="extend-table">
+<h3><a class="toc-backref" href="#id33">13.2.1. extend-table</a><a class="headerlink" href="#extend-table" title="Permalink to this headline">¶</a></h3>
+<p>扩展一个table</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">extend-table</span> <span class="nv">cons</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lookup-in-table">
+<h3><a class="toc-backref" href="#id34">13.2.2. lookup-in-table</a><a class="headerlink" href="#lookup-in-table" title="Permalink to this headline">¶</a></h3>
+<p>根据name在table中查找其对应的值。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">lookup-in-table</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span> <span class="nv">table</span> <span class="nv">table-f</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">table</span><span class="p">)</span> <span class="p">(</span><span class="nf">table-f</span> <span class="nv">name</span><span class="p">))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">lookup-in-table</span> <span class="nv">name</span>
+                             <span class="p">(</span><span class="nb">car </span><span class="nv">table</span><span class="p">)</span>
+                             <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span><span class="p">)</span>
+                               <span class="p">(</span><span class="nf">lookup-in-table</span> <span class="nv">name</span>
+                                                <span class="p">(</span><span class="nb">cdr </span><span class="nv">table</span><span class="p">)</span>
+                                                <span class="nv">table-f</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="scheme">
+<h2><a class="toc-backref" href="#id35">13.3. 简化版Scheme解释器</a><a class="headerlink" href="#scheme" title="Permalink to this headline">¶</a></h2>
+<p>作者通过一系列的对话，总结了Scheme中几种基本语义类型。</p>
+<ul class="simple">
+<li><a href="#id1"><span class="problematic" id="id2">*</span></a>const</li>
+<li><a href="#id3"><span class="problematic" id="id4">*</span></a>quote</li>
+<li><a href="#id5"><span class="problematic" id="id6">*</span></a>identfier</li>
+<li><a href="#id7"><span class="problematic" id="id8">*</span></a>lambda</li>
+<li><a href="#id9"><span class="problematic" id="id10">*</span></a>cond</li>
+<li><a href="#id11"><span class="problematic" id="id12">*</span></a>application</li>
+</ul>
+<p>既然Scheme作为一门函数式编程语言，自然就用函数(function)来表示上面这些语义类型了。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>如果有兴趣的同学可以在网上搜索一下其它语言的Scheme解释器实现（比如：Python），
+有的是用类来实现的。</p>
+<p class="last">当然用什么来表示这些类型不是重点，重点是要了解解释器的原理。</p>
+</div>
+<p>那写解释器的第一步：</p>
+<div class="highlight-python"><div class="highlight"><pre>我们需要知道某个S表达式属于上面归纳的那种语义类型，
+
+并且找到该类型对应的处理函数。
+</pre></div>
+</div>
+<div class="section" id="expression-to-action">
+<h3><a class="toc-backref" href="#id36">13.3.1. expression-to-action</a><a class="headerlink" href="#expression-to-action" title="Permalink to this headline">¶</a></h3>
+<p>实现S表达式属于哪种语义类型，并返回其对应的处理函数。</p>
+<p>从第一章节我们就开始了Scheme中S表达式有两种：</p>
+<ol class="arabic simple">
+<li>atom</li>
+<li>list</li>
+</ol>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">expression-to-action</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nf">atom-to-action</span> <span class="nv">e</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">list-to-action</span> <span class="nv">e</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="atom-to-action">
+<h3><a class="toc-backref" href="#id37">13.3.2. atom-to-action</a><a class="headerlink" href="#atom-to-action" title="Permalink to this headline">¶</a></h3>
+<p>实现atom类型的S表达式属于哪种语义类型，并返回其对应的处理函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">atom-to-action</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">number? </span><span class="nv">e</span><span class="p">)</span> <span class="nv">*const</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="no">#t</span><span class="p">)</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="no">#f</span><span class="p">)</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">cons</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">car</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">cdr</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">null?</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">eq?</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">atom?</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">zero?</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">add1</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">sub1</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="nv">number?</span><span class="p">))</span> <span class="nv">*const</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="nv">*identfier</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-to-action">
+<h3><a class="toc-backref" href="#id38">13.3.3. list-to-action</a><a class="headerlink" href="#list-to-action" title="Permalink to this headline">¶</a></h3>
+<p>实现atom类型的S表达式属于哪种语义类型，并返回其对应的处理函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">list-to-action</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">e</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">quote</span><span class="p">))</span> <span class="nv">*quote</span><span class="p">)</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">lambda</span><span class="p">))</span> <span class="nv">*lambda</span><span class="p">)</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">cond</span><span class="p">))</span> <span class="nv">*cond</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">else </span><span class="nv">*application</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="nv">*application</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="value">
+<h3><a class="toc-backref" href="#id39">13.3.4. value</a><a class="headerlink" href="#value" title="Permalink to this headline">¶</a></h3>
+<p>虽然上面两个函数里面有一堆的help函数未实现，但是咱们先假定它们实现，先把最外层的框架写好，再实现底层细节。</p>
+<p>有了expression-to-action，那么解释器的雏形就有了。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; (quote ()) 表示一个空的table</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">value</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">meaning</span> <span class="nv">e</span> <span class="p">(</span><span class="k">quote </span><span class="p">()))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">meaning</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">((</span><span class="nf">expression-to-action</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">e</span> <span class="nv">table</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>e好理解，就是需要解释的S表达式么，table是做什么的？</p>
+<p>table是用来存储与S表达式对应的上下文环境。</p>
+<p>比如：S表达式 <cite>(+ n 1)</cite> ，当我们计算 <cite>(+ n 1)</cite> 怎样知道n的值？</p>
+<div class="highlight-python"><div class="highlight"><pre>答案就在table里。
+
+解释器会在给n赋值的时候就将其对应关系保存到了table中，
+当调用 `(+ n 1)` 时，解释器就会从table中获取n对应的数值，然后再进行计算。
+</pre></div>
+</div>
+</div>
+<div class="section" id="const">
+<h3><a class="toc-backref" href="#id40">13.3.5. <a href="#id13"><span class="problematic" id="id14">*</span></a>const</a><a class="headerlink" href="#const" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*const</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">number? </span><span class="nv">e</span><span class="p">)</span> <span class="nv">e</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="no">#t</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">e</span> <span class="no">#f</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="k">quote </span><span class="nv">primitive</span><span class="p">)</span> <span class="nv">e</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="quote">
+<h3><a class="toc-backref" href="#id41">13.3.6. <a href="#id15"><span class="problematic" id="id16">*</span></a>quote</a><a class="headerlink" href="#quote" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*quote</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">text-of</span> <span class="nv">e</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">text-of</span> <span class="nv">second</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="identfier">
+<h3><a class="toc-backref" href="#id42">13.3.7. <a href="#id17"><span class="problematic" id="id18">*</span></a>identfier</a><a class="headerlink" href="#identfier" title="Permalink to this headline">¶</a></h3>
+<p>这里就是我上面关于table的说明了。</p>
+<p><cite>(+ n 1)</cite> 中的n会被当作 <cite>identfier</cite> 来处理，就会调用下面的 <cite>*identfier</cite> 处理函数。</p>
+<p><cite>*identfier</cite> 则从table中找出与n对应的值。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*identfier</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">lookup-in-table</span> <span class="nv">e</span> <span class="nv">table</span> <span class="nv">initial-table</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">initial-table</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="k">quote </span><span class="p">()))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lambda">
+<h3><a class="toc-backref" href="#id43">13.3.8. <a href="#id19"><span class="problematic" id="id20">*</span></a>lambda</a><a class="headerlink" href="#lambda" title="Permalink to this headline">¶</a></h3>
+<p>元语函数和非元语函数有什么区别？</p>
+<p>元语函数是指Scheme语言本身提供的一些基本函数。
+其实就是一些我们在写Scheme解释器时预先定义好的函数。</p>
+<p>非元语函数是用户通过(lambda ...)形式来定义的函数。那我们在解析到非元语函数时，需要将它的参数和函数体保存到table中，等待之后的*identfier调用。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*lambda</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="k">quote </span><span class="nv">non-primitive</span><span class="p">)</span>
+           <span class="p">(</span><span class="nb">cons </span><span class="nv">table</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">e</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<p><a href="#id21"><span class="problematic" id="id22">*</span></a>lambda会将table、参数、函数体绑定在一个列表中。</p>
+<p>那么为了方便我们之后取出对应的数据，我再定义一些help函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">table-of</span> <span class="nv">first</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">formals-of</span> <span class="nv">second</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">body-of</span> <span class="nv">third</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cond">
+<h3><a class="toc-backref" href="#id44">13.3.9. <a href="#id23"><span class="problematic" id="id24">*</span></a>cond</a><a class="headerlink" href="#cond" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*cond</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">evcon</span> <span class="p">(</span><span class="nf">cond-lines-of</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">table</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">cond-lines-of</span> <span class="nv">cdr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>evcon实现了cond函数的功能。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">evcon</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lines</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">else?</span> <span class="p">(</span><span class="nf">question-of</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lines</span><span class="p">)))</span>
+      <span class="p">(</span><span class="nf">meaning</span> <span class="p">(</span><span class="nf">answer-of</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lines</span><span class="p">))</span> <span class="nv">table</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">meaning</span> <span class="p">(</span><span class="nf">question-of</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lines</span><span class="p">))</span> <span class="nv">table</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">meaning</span> <span class="p">(</span><span class="nf">answer-of</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lines</span><span class="p">))</span> <span class="nv">table</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">evcon</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lines</span><span class="p">)</span> <span class="nv">table</span><span class="p">)))))</span>
+
+<span class="c1">;; 判断某个S表达式是否为else分支</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">else?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">eq? </span><span class="nv">x</span> <span class="p">(</span><span class="k">quote </span><span class="nv">else</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">question-of</span> <span class="nv">first</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">answer-of</span> <span class="nv">second</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>evcon没有判断lines是否为空。</p>
+<p>可能作者是为了实现的简洁，暂时忽略这种异常情况。</p>
+<p class="last">所以在使用本章节实现的Scheme解释器时，cond函数中最好至少代入一个判断分支语句。</p>
+</div>
+</div>
+<div class="section" id="application">
+<h3><a class="toc-backref" href="#id45">13.3.10. <a href="#id25"><span class="problematic" id="id26">*</span></a>application</a><a class="headerlink" href="#application" title="Permalink to this headline">¶</a></h3>
+<p>application表示的是这样一种S表达式：</p>
+<div class="highlight-python"><div class="highlight"><pre>它为一个列表，列表的第一个元素(car)表示一个函数，
+剩余的元素(cdr)表示该函数的调用参数。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">*application</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">apply</span>
+      <span class="p">(</span><span class="nf">meaning</span> <span class="p">(</span><span class="nf">function-of</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">table</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">evlis</span> <span class="p">(</span><span class="nf">arguments-of</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">table</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">function-of</span> <span class="nv">car</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">arguments-of</span> <span class="nv">cdr</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; 获取调用参数中每参数所对应的值。</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">evlis</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">args</span> <span class="nv">table</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">args</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="p">()))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">meaning</span> <span class="p">(</span><span class="nb">car </span><span class="nv">args</span><span class="p">)</span> <span class="nv">table</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">evlis</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">args</span><span class="p">)</span> <span class="nv">table</span><span class="p">))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="apply">
+<h3><a class="toc-backref" href="#id46">13.3.11. apply</a><a class="headerlink" href="#apply" title="Permalink to this headline">¶</a></h3>
+<p>执行函数调用。</p>
+<p>上面讲过函数分为两种：</p>
+<ol class="arabic simple">
+<li>元语函数</li>
+<li>非元语函数（自定义函数）</li>
+</ol>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">apply</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">func</span> <span class="nv">vals</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">primitive?</span> <span class="nv">fun</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">apply-primitive</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">fun</span><span class="p">)</span> <span class="nv">vals</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">non-primitive?</span> <span class="nv">fun</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">apply-closure</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">fun</span><span class="p">)</span> <span class="nv">vals</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">primitive?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">primitive</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">non-primitive?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">non-primitive</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">apply-primitive</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">name</span> <span class="nv">vals</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">cons</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">car</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">cdr</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">null?</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">null? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">eq?</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">atom?</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">:atom?</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">zero?</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">add1</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">sub1</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">sub1</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">name</span> <span class="p">(</span><span class="k">quote </span><span class="nv">number?</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">number? </span><span class="p">(</span><span class="nf">first</span> <span class="nv">vals</span><span class="p">))))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">:atom?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">x</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">x</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">primitive</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="k">quote </span><span class="nv">non-primitive</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; 将调用参数及非元语函数的参数组成一个entry（组成对应关系）</span>
+<span class="c1">;; 然后添加到table中，再对该非元语函数的函数体求值即可。</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">apply-closure</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">closure</span> <span class="nv">vals</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">meaning</span> <span class="p">(</span><span class="nf">body-of</span> <span class="nv">closure</span><span class="p">)</span>
+             <span class="p">(</span><span class="nf">extend-table</span> <span class="p">(</span><span class="nf">new-entry</span> <span class="p">(</span><span class="nf">formals-of</span> <span class="nv">closure</span><span class="p">)</span>
+                                      <span class="nv">vals</span><span class="p">)</span>
+                           <span class="p">(</span><span class="nf">table-of</span> <span class="nv">closure</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id27">
+<h2><a class="toc-backref" href="#id47">13.4. 结语</a><a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
+<p>到这里，一个简化版的Scheme解释器就完成了，当然，这个解释器离实用还很远，如果想对其进一步了解，请阅读《The Seasoned Schemer》。</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">13. What Is the Value of All of This?</a><ul>
+<li><a class="reference internal" href="#entry">13.1. entry</a><ul>
+<li><a class="reference internal" href="#new-entry">13.1.1. new-entry</a></li>
+<li><a class="reference internal" href="#lookup-in-entry">13.1.2. lookup-in-entry</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#table">13.2. table</a><ul>
+<li><a class="reference internal" href="#extend-table">13.2.1. extend-table</a></li>
+<li><a class="reference internal" href="#lookup-in-table">13.2.2. lookup-in-table</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#scheme">13.3. 简化版Scheme解释器</a><ul>
+<li><a class="reference internal" href="#expression-to-action">13.3.1. expression-to-action</a></li>
+<li><a class="reference internal" href="#atom-to-action">13.3.2. atom-to-action</a></li>
+<li><a class="reference internal" href="#list-to-action">13.3.3. list-to-action</a></li>
+<li><a class="reference internal" href="#value">13.3.4. value</a></li>
+<li><a class="reference internal" href="#const">13.3.5. *const</a></li>
+<li><a class="reference internal" href="#quote">13.3.6. *quote</a></li>
+<li><a class="reference internal" href="#identfier">13.3.7. *identfier</a></li>
+<li><a class="reference internal" href="#lambda">13.3.8. *lambda</a></li>
+<li><a class="reference internal" href="#cond">13.3.9. *cond</a></li>
+<li><a class="reference internal" href="#application">13.3.10. *application</a></li>
+<li><a class="reference internal" href="#apply">13.3.11. apply</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id27">13.4. 结语</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_09.html"
+                        title="previous chapter">12. ... and Again, and Again, and Again ...</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_10.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_09.html" title="12. ... and Again, and Again, and Again ..."
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

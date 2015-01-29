@@ -1,0 +1,725 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>12. ... and Again, and Again, and Again ... &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="13. What Is the Value of All of This?" href="chapter_10.html" />
+    <link rel="prev" title="11. Lambda the Ultimate" href="chapter_08.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_10.html" title="13. What Is the Value of All of This?"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_08.html" title="11. Lambda the Ultimate"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="and-again-and-again-and-again">
+<h1><a class="toc-backref" href="#id8">12. ... and Again, and Again, and Again ...</a><a class="headerlink" href="#and-again-and-again-and-again" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#and-again-and-again-and-again" id="id8">... and Again, and Again, and Again ...</a><ul>
+<li><a class="reference internal" href="#id1" id="id9">偏函数</a><ul>
+<li><a class="reference internal" href="#looking" id="id10">looking</a></li>
+<li><a class="reference internal" href="#eternity" id="id11">eternity</a></li>
+<li><a class="reference internal" href="#shift" id="id12">shift</a></li>
+<li><a class="reference internal" href="#align" id="id13">align</a></li>
+<li><a class="reference internal" href="#length" id="id14">length*</a></li>
+<li><a class="reference internal" href="#weight" id="id15">weight*</a></li>
+<li><a class="reference internal" href="#shuffle" id="id16">shuffle</a></li>
+<li><a class="reference internal" href="#id2" id="id17">其它例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id3" id="id18">停机问题</a></li>
+<li><a class="reference internal" href="#y" id="id19">Y算子</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>这一章节的内容基本讲的都是数学上的概念或者理论。
+
+一上来先讲到了偏函数（数学概念），然后由此引入了停机问题，
+
+最后讲到了递归的理论基础：Y算子。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id9">12.1. 偏函数</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="looking">
+<h3><a class="toc-backref" href="#id10">12.1.1. looking</a><a class="headerlink" href="#looking" title="Permalink to this headline">¶</a></h3>
+<p>从lat的第一元素找起，如果第一元素与a相同同为#t，如果不相同，则跳转到第一元素所对应的lat中的位置再进行比较，直到找到与a相同的S表达式为止。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; looking: symbol lat -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">looking</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">keep-looking</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">pick</span> <span class="mi">1</span> <span class="nv">lat</span><span class="p">)</span> <span class="nv">lat</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">keep-looking</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">sorn</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">number? </span><span class="nv">sorn</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">keep-looking</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">pick</span> <span class="nv">sorn</span> <span class="nv">lat</span><span class="p">)</span> <span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">eq? </span><span class="nv">sorn</span> <span class="nv">a</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<p>细心的读者看上面的代码或者定义就知道looking函数有个问题：</p>
+<div class="highlight-python"><div class="highlight"><pre>并不所有的输入它都能生成对应的结果。
+</pre></div>
+</div>
+<p>比如：</p>
+<div class="highlight-python"><div class="highlight"><pre>a = caviar
+
+lat = (7 1 2 caviar 5 6 3)
+</pre></div>
+</div>
+<p>上面两个参数代入looking函数的后果就是一直死循环，永远不会有结果。</p>
+<p>作者将这类不能对所有参数都能产生结果的函数称为 <strong>偏函数</strong> 。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>这里的 <strong>偏函数</strong> 是指数字概念上的偏函数，和许多编程语言里的偏函数是不一样的。</p>
+<p class="last">数学上偏函数定义请参见 <a class="reference external" href="http://zh.wikipedia.org/zh-cn/%E5%87%BD%E6%95%B0">Wiki: 函数</a></p>
+</div>
+</div>
+<div class="section" id="eternity">
+<h3><a class="toc-backref" href="#id11">12.1.2. eternity</a><a class="headerlink" href="#eternity" title="Permalink to this headline">¶</a></h3>
+<p>然后作者举例了一个更彻底更简短的偏函数：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">eternity</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">eternity</span> <span class="nv">x</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>eternity对所有的参数都不能产生结果。</p>
+</div>
+<div class="section" id="shift">
+<h3><a class="toc-backref" href="#id12">12.1.3. shift</a><a class="headerlink" href="#shift" title="Permalink to this headline">¶</a></h3>
+<p>该函数的参数为一个点对，且该点对的第一个S表达式也为一个点对(first)，函数会将该参数的中的第中的第二个S表达式(second)和first中的second合并。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Sorry，本人水平有限，看不明白上面的话就直接看代码吧。</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">shift</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pair</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">first</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pair</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">second</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pair</span><span class="p">))</span>
+                  <span class="p">(</span><span class="nf">second</span> <span class="nv">pair</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="align">
+<h3><a class="toc-backref" href="#id13">12.1.4. align</a><a class="headerlink" href="#align" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">align</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pora</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">pora</span><span class="p">)</span> <span class="nv">pora</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">a-pair?</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">align</span> <span class="p">(</span><span class="nf">shift</span> <span class="nv">pora</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">)</span>
+                  <span class="p">(</span><span class="nf">align</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">pora</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>align仅仅是调整了参数中S表达式的位置。</p>
+<p>从它的表面行为来看，它貌似也违反了十戒中的第七戒：</p>
+<div class="highlight-python"><div class="highlight"><pre>当一个对象的子对象是与其本身表现一致时，这时候可用递归操作。比如：
+
+* 一个列表的子列表
+
+* 一个算术表达式的子表达式
+</pre></div>
+</div>
+<p>因为参数经过align操作后，并非原参数的子列表，所以我们目前无法一眼就确认align是一个全函数还是一个偏函数。</p>
+<p>那么，咱们接下来找出方法来确定align是一个全函数还是一个偏函数。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">其实，参与递归的参数要有一个趋向性，第七戒只能算是其中一种。</p>
+</div>
+</div>
+<div class="section" id="length">
+<h3><a class="toc-backref" href="#id14">12.1.5. length*</a><a class="headerlink" href="#length" title="Permalink to this headline">¶</a></h3>
+<p>计算align参数的长度。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">length*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pora</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">pora</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">length*</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">length*</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">pora</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>我们先看看这个指标是能否表示align的趋向性。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">align</span> <span class="o">&#39;</span><span class="p">((</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+<span class="nv">$25</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">a</span> <span class="p">(</span><span class="nf">b</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">length*</span> <span class="o">&#39;</span><span class="p">((</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+<span class="nv">$26</span> <span class="nv">=</span> <span class="mi">4</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">length*</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">))))</span>
+<span class="nv">$27</span> <span class="nv">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<p>好吧，这个指标明显不能表示align的趋向性，传入的参数和输出的结果的长度都一样，只能继续找其它指标。</p>
+</div>
+<div class="section" id="weight">
+<h3><a class="toc-backref" href="#id15">12.1.6. weight*</a><a class="headerlink" href="#weight" title="Permalink to this headline">¶</a></h3>
+<p>计算align参数的权重。</p>
+<p>align每次都会对点对中的第一个S表达式特殊对待，所以我们可以增加它的权重，在计算其长度的基础上，设定第一个S表达式占的权重为2,第二个S表达式占的权重为1。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">weight*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pora</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">pora</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">weight*</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">))</span> <span class="mi">2</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">weight*</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">pora</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>我们再来试试看。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">align</span> <span class="o">&#39;</span><span class="p">((</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+<span class="nv">$25</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">a</span> <span class="p">(</span><span class="nf">b</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">weight*</span> <span class="o">&#39;</span><span class="p">((</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+<span class="nv">$26</span> <span class="nv">=</span> <span class="mi">9</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">weight*</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">))))</span>
+<span class="nv">$27</span> <span class="nv">=</span> <span class="mi">7</span>
+</pre></div>
+</div>
+<p>嗯，看出苗头了，如果我们用更多的参数进行测试的话，这个趋向性就更明显了，所以说，align不是一个偏函数。</p>
+</div>
+<div class="section" id="shuffle">
+<h3><a class="toc-backref" href="#id16">12.1.7. shuffle</a><a class="headerlink" href="#shuffle" title="Permalink to this headline">¶</a></h3>
+<p>还是刚才align的逻辑，只不过用revpair函数来替换shift函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">shuffle</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pora</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">pora</span><span class="p">)</span> <span class="nv">pora</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">a-pair?</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">shuffle</span> <span class="p">(</span><span class="nf">revpair</span> <span class="nv">pora</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">pora</span><span class="p">)</span>
+                  <span class="p">(</span><span class="nf">shuffle</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">pora</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>现在咱们再来求证shuffle是否是一个偏函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">shuffle</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)))</span>
+<span class="nv">$1</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">a</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">shuffle</span> <span class="o">&#39;</span><span class="p">(</span><span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+<span class="nv">$2</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">shuffle</span> <span class="o">&#39;</span><span class="p">((</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span><span class="p">)))</span>
+<span class="o">...</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>(shuffle &#8216;((a b) (c d)))一直运行不出结果（死循环），所以它是偏函数。</p>
+</div>
+<div class="section" id="id2">
+<h3><a class="toc-backref" href="#id17">12.1.8. 其它例子</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>接下来作者又列出了几个偏函数的例子并且直接给出结果，未给出证明步骤。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">C</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">one?</span> <span class="nv">n</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">even? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">C</span> <span class="p">(</span><span class="nb">/ </span><span class="nv">n</span> <span class="mi">2</span><span class="p">)))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">C</span> <span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">* </span><span class="mi">3</span> <span class="nv">n</span><span class="p">)))))))))</span>
+</pre></div>
+</div>
+<p>C函数除了传入参数0没有值外，其它都能得到结果，所以它是一个偏函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">A</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">m</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">A</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="mi">1</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">A</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">A</span> <span class="nv">n</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>A虽然是一个全函数，但是对于某些参数，它的运行时间可能会非常地长。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">作者给出了一系列的例子，是为了引入了停机问题。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2><a class="toc-backref" href="#id18">12.2. 停机问题</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>相关概念可参考：</p>
+<ol class="last arabic simple">
+<li><a class="reference external" href="http://zh.wikipedia.org/wiki/%E5%81%9C%E6%9C%BA%E9%97%AE%E9%A2%98">Wiki: 停机问题</a></li>
+<li><a class="reference external" href="http://www.zhihu.com/question/20081359">如何通俗地解释停机问题（Halting Problem）？</a></li>
+</ol>
+</div>
+<p>既然有偏函数这种求不出结果（一直在运算，不会返回结果）的函数存在，那我们能不能编写出一个函数，能够判断某个函数是否是偏函数呢？</p>
+<p>我们先假设有这样一个函数：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">will-stop?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span>
+    <span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>然后利用这个函数再编写一个函数：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">last-try</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">will-stop?</span> <span class="nv">last-try</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">eternity</span> <span class="nv">x</span><span class="p">))))</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>假设(will-stop? last-try)返回的是#t，则(and (will-stop? last-try) (eternity x)) == (eternity x)，(eternity x)是偏函数，不会返回结果，所以last-try也不会返回结果。该假设不成立。</li>
+<li>假设(will-stop? last-try)返回的是#f，则(and (will-stop? last-try) (eternity x))为#f，所以last-try也返回#f。该假设也不成立。</li>
+</ol>
+<p>通过上面的证明， 我们无法定义出will-stop?这种函数出来。</p>
+</div>
+<div class="section" id="y">
+<h2><a class="toc-backref" href="#id19">12.3. Y算子</a><a class="headerlink" href="#y" title="Permalink to this headline">¶</a></h2>
+<p>Scheme通过(define ...)来定义一个函数。上面我们说到我们无法定义出will-stop?函数，作者此时话峰一转，问道：那递归函数呢？</p>
+<p>我在定义某个递归函数的时候（以length为例），length还在正在被定义当中，怎么能自己调用自己呢？</p>
+<p>通过这个问题作者就引入了Y算子(Y Combiniator)，也叫Y组合子。</p>
+<div class="highlight-python"><div class="highlight"><pre>不动点组合子（Fixed-point combinator；不动点算子）是计算其他函数的一个不动点的高阶函数。
+
+函数f的不动点是一个值x使得f(x) = x。
+
+鉴于一阶函数（在简单值比如整数上的函数）的不动点是个一阶值，
+高阶函数f的不动点是另一个函数g使得f(g) = g。
+那么，不动点算子是任何函数fix使得对于任何函数f都有
+
+  f(fix(f)) = fix(f)。
+
+不动点组合子允许定义匿名的递归函数。它们可以用非递归的lambda抽象来定义。
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>相关概念可参考：</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.dreamsongs.com/Files/WhyOfY.pdf#search=%22The%20Why%20of%20Y%22">The Why of Y</a></li>
+<li><a class="reference external" href="http://zh.wikipedia.org/wiki/%E4%B8%8D%E5%8A%A8%E7%82%B9%E7%BB%84%E5%90%88%E5%AD%90">Wiki: 不动点组合子</a></li>
+</ol>
+<p class="last">此外，下面的推导过程大量使用了 <a class="reference external" href="http://zh.wikipedia.org/wiki/%CE%9B%E6%BC%94%E7%AE%97">Wiki: λ演算</a> 中的 <strong>α-变换</strong> 和 <strong>β-归约</strong> 这两个概念。</p>
+</div>
+<p>接下的代码就是就以length函数为例，一步步推导出Y算子。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; 使用define的length函数定义</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">length</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>现在没有了define这个定义功能，也就是说没有了length这个名称了，我们怎么调用自身呢？</p>
+<p>好吧，让我先从最简单的情形一步步分析。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length0</span>
+<span class="c1">;; 计算元素个数为0的列表长度</span>
+<span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cond</span>
+   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">eternity</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=1</span>
+<span class="c1">;; 计算元素个数为1的列表长度</span>
+<span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cond</span>
+   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">length0</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+
+<span class="c1">;; 将length0替换成它的定义</span>
+<span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cond</span>
+   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add</span> <span class="mi">1</span> <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">cond</span>
+                    <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">eternity</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+                 <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=2</span>
+<span class="c1">;; 计算元素个数为1的列表长度</span>
+<span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cond</span>
+   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">length&lt;=1</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+
+
+<span class="c1">;; 将length&lt;=1替换为它的定义</span>
+<span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cond</span>
+   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+                  <span class="p">(</span><span class="nf">cond</span>
+                   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="nf">cond</span>
+                                   <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+                                   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">eternity</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+                                <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+                <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<p>参照上面的思路，我们可以整出length&lt;=3...length∞</p>
+<p>但是按这种思路写出来的代码不实现，越到后面的函数最大，根本无法真正写出来。</p>
+<p>我们可以重新调整一下length：</p>
+<div class="highlight-python"><div class="highlight"><pre>根据上面的代码发现一个现象，每个length函数的大体逻辑是一样，
+每次只是eternity这个位置的代码发生了变化。
+
+好的，既然只有它是可变的，那么我们就将之提取出来，当作参数传入。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length0</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+ <span class="nv">eternity</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=1</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">f</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+ <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">g</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">g</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+  <span class="nv">eternity</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=2</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+ <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+  <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">cond</span>
+        <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+   <span class="nv">eternity</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>照上面的逻辑写下去，和以前没差啊，还是要写很多。</p>
+<p>咱们再重新调整一下length：</p>
+<div class="highlight-python"><div class="highlight"><pre>我们再观察一下上面的代码：
+(lambda (length)
+     (lambda (l)
+       (cond
+        ((null? l) 0)
+        (else (add1 (length (cdr l)))))))
+
+貌似就这个函数每次在重复。
+好的，我们也将它提取出来，当作参数传入。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length0</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">eternity</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+
+ <span class="c1">;; length0简化为(mk-length eternity)</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=1</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">eternity</span><span class="p">)))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+
+ <span class="c1">;; length&lt;=1简化为(mk-length (mk-length eternity))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=2</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">eternity</span><span class="p">))))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+
+<span class="c1">;; length&lt;=2简化为(mk-length (mk-length (mk-length eternity)))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=3</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">eternity</span><span class="p">)))))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+
+<span class="c1">;; length&lt;=3简化为(mk-length (mk-length (mk-length (mk-length eternity))))</span>
+</pre></div>
+</div>
+<p>上面的逻辑/代码比之前简单了，但还是没有根本解决问题，所以还需要继续调整：</p>
+<div class="highlight-python"><div class="highlight"><pre>还是先从length0看起，
+eternity没起什么实质的作用，\
+我们就用mk-length来代替之；
+length也是，不就一个参数名么，要统一就全部统一。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length0</span>
+<span class="c1">;; 将eternity替换为mk-length</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+
+<span class="c1">;; length0</span>
+<span class="c1">;; 使用α-变换将length替换为mk-length</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">mk-length</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<p>继续调整length&lt;=1。</p>
+<div class="highlight-python"><div class="highlight"><pre>上面的length0如果变成length&lt;=1的话，就会走到else分支，
+走到else分支就出错了，因为mk-length本身是一个函数，然后它将自身当作参数传入。
+而(add1 (mk-length (cdr l)))却给mk-length传入了一个列表。
+
+所以我们简单改一下(add1 (mk-length (cdr l)))中的mk-length即可，
+让它支持计算长度不超过1的列表。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length&lt;=1</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">((</span><span class="nf">mk-length</span> <span class="nv">eternity</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<p>咱们再做最后一次的调整：</p>
+<div class="highlight-python"><div class="highlight"><pre>再将eternity替换为mk-length，然后length函数就诞生了。
+
+我们简单梳理一下（以计算长度为2的列表为例）：
+
+1. (mk-length mk-length)这个操作生成一个计算列表长度的函数length&lt;=2。
+
+2. 由于列表不为空，它会走到else分支。
+
+3. 在else分支中，又生成了一个计算列表长度的函数，并且对(cdr l)计算其长度，然后+1返回。
+
+4. 现在(cdr l)长度为1，然后又走到else分支。
+
+5. 在else分支中，又生成了一个计算列表长度的函数，并且对(cdr l)计算其长度，然后+1返回。
+
+6. (cdr l)长度为0，这次不走else分支了，直接返回0。
+
+7. 0 + 1 + 1 = 2， 最后返回2。
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">((</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<p>不过还是有一个问题：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; 使用define的length函数定义</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">length</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>这是使用define的length函数定义，但现在不用define之后，和原来的代码写法不一样了。</p>
+<p>一眼看去，不一样的地方在 <cite>(mk-length mk-length)</cite> ，将之提取出来吧。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+   <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">cond</span>
+         <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+      <span class="p">((</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">)</span> <span class="nv">x</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<p>最里的函数貌似和原来的定义一样了，但是它陷在里面，将之提到外面来。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; length</span>
+<span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">le</span><span class="p">)</span>
+   <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">le</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+            <span class="p">((</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">)</span> <span class="nv">x</span><span class="p">))))))</span>
+ <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">length</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<p>好了，这次length函数的定义提取出来了，那我们得到一个额外的东西：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">le</span><span class="p">)</span>
+  <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">))</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mk-length</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">le</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+           <span class="p">((</span><span class="nf">mk-length</span> <span class="nv">mk-length</span><span class="p">)</span> <span class="nv">x</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<p>就是它提供了一种能力：将某个非递归函数转换为递归形式。</p>
+<p>我们可以给它起个名字： <strong>应用序Y算子</strong></p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">Y</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">le</span><span class="p">)</span>
+    <span class="p">((</span><span class="k">lambda </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">f</span> <span class="nv">f</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">le</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+             <span class="p">(</span><span class="nf">f</span> <span class="nv">f</span><span class="p">)</span> <span class="nv">x</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>关于应用序，可以参考： <a class="reference external" href="http://zh.wikipedia.org/wiki/%E6%B1%82%E5%80%BC%E7%AD%96%E7%95%A5">Wiki: 求值策略</a></p>
+<p class="last">可同时参考： <a class="reference external" href="http://www.cppblog.com/huaxiazhihuo/archive/2013/07/13/201689.html">scheme下的停机问题和Y组合子</a></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">12. ... and Again, and Again, and Again ...</a><ul>
+<li><a class="reference internal" href="#id1">12.1. 偏函数</a><ul>
+<li><a class="reference internal" href="#looking">12.1.1. looking</a></li>
+<li><a class="reference internal" href="#eternity">12.1.2. eternity</a></li>
+<li><a class="reference internal" href="#shift">12.1.3. shift</a></li>
+<li><a class="reference internal" href="#align">12.1.4. align</a></li>
+<li><a class="reference internal" href="#length">12.1.5. length*</a></li>
+<li><a class="reference internal" href="#weight">12.1.6. weight*</a></li>
+<li><a class="reference internal" href="#shuffle">12.1.7. shuffle</a></li>
+<li><a class="reference internal" href="#id2">12.1.8. 其它例子</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id3">12.2. 停机问题</a></li>
+<li><a class="reference internal" href="#y">12.3. Y算子</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_08.html"
+                        title="previous chapter">11. Lambda the Ultimate</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_10.html"
+                        title="next chapter">13. What Is the Value of All of This?</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_09.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_10.html" title="13. What Is the Value of All of This?"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_08.html" title="11. Lambda the Ultimate"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

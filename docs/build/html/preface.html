@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. 序言 &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="4. Toys" href="chapter_01.html" />
+    <link rel="prev" title="2. 前言" href="foreword.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_01.html" title="4. Toys"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="foreword.html" title="2. 前言"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="id1">
+<h1>3. 序言<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<hr class="docutils" />
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>为了庆祝Scheme的20周年纪念，我们第三次修订了 <cite>The Little LISPer</cite> ，</p>
+<p>给了它一个更加准确的名字 <cite>The Little Schemer</cite> ，</p>
+<p class="last">并且写了一本它的续篇 <cite>The Seasoned Schemer</cite> 。</p>
+</div>
+<p>程序接收和产生数据。设计一个程序需要对处理的数据有透彻的了解。一个好的程序同样也会反映出它所处理的数据的结构。大部分的数据及程序都是递归形式的。递归是一种通过自己定义自己，或者自己调用自己来求解问题的行为。</p>
+<p><strong>本书的目标是教会读者递归思想</strong> 。首先一个任务就是决定哪一种语言阐述这种概念。这里有三个明显的选择：自然语言，比如英语；严谨的数学表达式；或者程序语言。自然语言模棱两可，不够准确，甚至冗长。这些在日常交流中自然语言的优势，在介绍递归这样精细的概念时却变成了劣势。数学表达式恰恰相反，它可以用极少的符号表达出一个复杂的概念。遗憾地是，数学表达往往晦涩难懂，只有经过专门的学习才能领会。技术和数学的结合给了我们一个更理想的选择──程序语言。我们相信，程序语言是解释递归这一概念的最佳媒介。它继承了数学的简明，但与之不同的是，我们可以运行代码来观察它们的行为，并通过不断地修改来评估这些改动带来的影响。</p>
+<p>Scheme也许是最适合教授递归的程序语言了。从Scheme一诞生就支持符号（计算）。程序员不必考虑他自己的语言符号和这些符号在计算机中如何表示。Scheme最根本的进行计算方法就是递归。编程最主要的工作就是找出（内在的）递归定义。大多数Scheme实现都采用交互的方式（译者：REPL）──程序员能立即感知程序的行为并进行调整。当你读完这本书，最大的感触可能是，Scheme程序和它要处理的数据存在着直接的对应。</p>
+<p>虽然Scheme很严谨，但理解Scheme并不需要经过专门的数学训练。实际上， <cite>The Little Schemer</cite> 出自一门为期两周的Scheme导论课的授课提纲，这门课是专门为没接触过编程，对数学又没有丝毫兴趣的学生开设的。这些学生大多准备从事公共事务方面的职业。我们的理念是“用Scheme递归地写出程序，关键是要识别出模式”。我们关注的是如何用递归的方式编程，因此我们只需用到Scheme中很小的一部分功能：car, cdr, cons, eq?, null?, zero?, add1, sub1, number?, and, or, quote, lambda, define, cond。事实上，这就够了。</p>
+<p><cite>The Little Schemer</cite> 和 <cite>The Seasoned Schemer</cite> 不会向你介绍怎么完成现实世界中的任务，但掌握这两本书中的概念将有助于你更好地理解计算的本质。</p>
+<div class="section" id="id2">
+<h2>3.1. 读者须知<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>读者应该能轻松地阅读英语，识数和计数。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">四级就够用了。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>3.2. 致谢<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>感谢一堆人，暂不翻译。</p>
+</div>
+<div class="section" id="id4">
+<h2>3.3. 给读者的建议<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>不要囫囵吞枣地阅读本书，仔细地阅读它。书里散落着很多有用的提示。至少阅读本书三次。按章节顺序读。如果你没有完全读懂前一章，那么下一章可能更不懂。每章节的难度是递增的，如果你不能解决前面的问题，那么后面的问题会更让你无处下手。</p>
+<p>本书是以一种你与我们之间的对话形式来展开的，对话的内容是一些有趣的Scheme编程例子。当你在阅读本书时，希望你能够尽量尝试运行那些例子。Scheme程序很容易读懂。虽然在不同的Scheme实现之间有一些细微的语法差别（主要是个别名字的拼写和某些函数的作用域稍有不同），但Scheme基本上是一致的。要运行书中的Scheme代码，你还需要定义atom?, sub1, add1.这些函数我们都会在书里详细介绍：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">atom?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">pair? </span><span class="nv">x</span><span class="p">))</span> <span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">null? </span><span class="nv">x</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<p>要想知道你的Scheme有没有正确地定义atom?，运行 <cite>(atom? (quote()))</cite> ，看是否返回#f。事实上，这个测试也适用于现代的Lisp版本，如Common Lisp。如果用你想使用Lisp，你需要添加atom?函数：</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="nf">defun</span> <span class="nv">atom?</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nf">listp</span> <span class="nv">x</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>你可能需要稍稍修改这程序。书中提供的例子可能都需要做一些修改。在书中，我会在旁注里注明在不同Scheme实现的一些特性。“S:”表示Scheme，“L:”表示Common Lisp。</p>
+<p>在第四章，我们会深入探讨三个基本的算术操作：add1, sub1, zero?。虽然Scheme没有提供add1和sub1，但你可以用内置的加减运算符来定义它们。为了避免逻辑上的死结，我们用另一套符号来表示基本的加减操作：＋, －。</p>
+<p>我们不会在书中给出任何标准的定义。我们相信你能自己搞出一套来，这样比我们给你一个写好的定义更能让你记住、理解它们。请好好消化十诫和五律。学习Scheme的关键是 <strong>模式识别</strong> 。十诫就是对你所见过的模式的总结。书一开始会简化一些概念。但随后，它们会被不断扩展、丰富。你应该知道，这本书里的所有东西都是Scheme，Scheme是一门通用编程语言，不是这样一本导论性质的书能讲清的。在你掌握了本书之后，你可以去阅读和理解一些进阶的有关Scheme的书了。</p>
+<p>我们编写本书时遵循一些约定。不同类别符号的字型稍有不同。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>主要的规定就是通过字体来标识不同类型的单词。</p>
+<p>该段下面基本就是告诉你各种类型的单词使用什么字体，</p>
+<p class="last">这个也不翻译了，看例子就知道。</p>
+</div>
+<p>最后谈一谈断句。Webster把断句定义为用标准的符号分割句子来使文意更明确的行为。有时为了表达清楚，我们会使用非常规的断句方式。注意我们不会对左栏的文字（译注：书采用对话形式，分为左右两栏）断句，因为那是程序语言。</p>
+<p>本书的例子中出现食物名有两个原因。</p>
+<ol class="arabic">
+<li><p class="first">食物比起那些抽象的符号来说更容易可视化</p>
+<p>（但是在你节食的时候读本书可不是一个好主意）。</p>
+<p>我们希望我们选择食物名能够有助读者理解本书中的例子和主题。</p>
+</li>
+<li><p class="first">我们希望在读书时能够小分一下心。</p>
+<p>我们知道当你试图理解这些主题时多少有点沮丧，</p>
+<p>但是一丢丢分心多少能够帮助你远离沮丧的情绪。</p>
+</li>
+</ol>
+<p>你现在要准备开始本书之旅了。祝你好运！我们希望你能够享受在接下来的章节里的挑战。</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">本篇翻译大部分参考了Sedgewick的 <a class="reference external" href="http://blog.csdn.net/sedgewick/article/details/6024036">The Little Schemer ── 小众Schemer？</a> 。</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3. 序言</a><ul>
+<li><a class="reference internal" href="#id2">3.1. 读者须知</a></li>
+<li><a class="reference internal" href="#id3">3.2. 致谢</a></li>
+<li><a class="reference internal" href="#id4">3.3. 给读者的建议</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="foreword.html"
+                        title="previous chapter">2. 前言</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_01.html"
+                        title="next chapter">4. Toys</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/preface.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_01.html" title="4. Toys"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="foreword.html" title="2. 前言"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

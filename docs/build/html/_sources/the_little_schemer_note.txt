@@ -1,0 +1,2003 @@
+TheLittleSchemer笔记
+====================
+
+:tags: lisp, scheme
+:category: scheme
+
+.. contents::
+
+总纲
+----
+scheme十戒
+~~~~~~~~~~
+#. 当对一个原子列表进行递归时，要注意两个问题：(null? lat) and else。
+
+   当对一个数字进行递归时，要注意两个问题：(zero? n) and else。
+
+   当对一个S表达式列表进行递归时，要注意三个问题：(null? l), (atom? (car l)) 和 else。
+
+#. 使用cons来创建列表。
+
+#. 当创建一个列表时，先描述第一个元素，然后用cons来将它和递归连接在一起
+
+#. 递归时，至少要改变一个参数。 例如：递归一个原子列表使用(cdr lat)；递归一个数字使用(sub1 n)；
+
+   递归一个S表达式时，如果这个表达式即不(null? l)，也不(atom? (car l))， 那么使用(car l) 和 (cdr l)。
+
+   并且该参数必须要越来越接近终止元素。在终止条件里面必须要对正在变化的参数进行检查：
+
+    + 当使用cdr时，终止条件使用null?
+
+    + 当使用sub1时，终止条件使用zero?
+
+#. 当你使用+来创建一个值时，必须总要用0来作为终止，0加上任何值都不会改变原来的值。
+
+   当你使用*来创建一个值时，必须总要用1来作为终止，1乘以任务值都不会改变原来的值。
+
+   当你使用cons来创建一个值时，必须总要用()来作为终止。
+
+#. 当函数运行正确后再考虑简化函数。
+
+#. 当一个对象的子对象是与其本身表现一致时，这时候可用递归操作。比如：
+
+    + 一个列表的子列表
+
+    + 一个算术表达式的子表达式
+
+#. 使用help函数来简化表述。
+
+#. 使用新的函数来抽象公共模式。
+
+#. 创建函数时，尽量能够一次性获取更多的值。
+
+scheme五律
+~~~~~~~~~~
+#. car函数最初只是用在非空列表上的。
+
+#. cdr函数最初只是用在非空列表上的，(cdr non-null-list)的结果是另一个列表。
+
+#. cons函数最初只接受两个参数，第二个参数必须是一个列表，它返回的结果也是一个列表。
+
+#. null?函数只对列表有用。
+
+#. eq?函数只接受两个参数，两个参数必须都是非数字的原子。
+
+第一章: Toys
+------------
+作者目的：使读者了解scheme一些基本概念和一些常用函数，为接下来的章节打基础。
+
+基本概念
+~~~~~~~~
++ S表达式: scheme中所以元素都可以叫做S表达式。
+
++ atom: 原子，是指一个非列表的S表达式。
+
++ list: 列表，用()包围起来的S表达式。
+
++ car: 返回非空列表中的首个S表达式， 所以它操作的对象一定要是非空的列表(十戒第一条)。
+
++ cdr: 取出非空列表中的除首个S表达式的列表， 它操作的对象也是要非空列表(十戒第一条)。
+
++ cons: 将两个S表达式连接成一个列表，第二个必须是一个列表。
+
++ null?: 只判断列表是否为空(scheme五律第四条)。
+
++ atom?: 用来判断一个S表达式是否为一个原子。
+
+  .. code-block:: scheme
+    
+     (define atom?
+       (lambda (m)
+          (and (not (pair? m)) (not (null? m)))))
+
++ eq?: 用来判断两个非数字的的原子是否相等，
+  (PS: guile的实现不太一样，它还可以比较数字。)
+
+其它概念
+~~~~~~~~
++ define: 用来定义一个名称，或者一个函数。
+
++ lambda: 用来定义一个函数。
+
++ cond: 相当于其它语言中的switch。
+
++ else: 永远返回#t, 即True。
+
+第二章: Do It, Do It Again, and Again, and Again…
+-------------------------------------------------
+lat操作
+~~~~~~~
+基本概念
+````````
++ lat: 列表中包含的每个S表达式都是原子的列表。
+
+应用
+````
++ lat?: 判断列表中是否每个S表达式都是原子。
+
+  .. code-block:: scheme
+    
+    (define lat?
+      (lambda (l)
+        (cond
+          ((null? l) #t)
+          ((atom? (car l)) (lat? (cdr l)))
+          (else #f))))
+
+  .. code-block:: scheme
+
+     (define col
+       (lambda (lat nolat)
+         (null? nolat)))
+    
+     (define lat?&co
+       (lambda (l col)
+         (cond
+           ((null? l) (col '() '()))
+           ((atom? (car l)) (lat?&co (cdr l)
+                                     (lambda (lat nolat)
+                                       (col (cons (car l) lat) nolat))))
+           (else (lat?&co (cdr l)
+                          (lambda (lat nolat)
+                            (col lat (cons (car l) nolat))))))))
+
++ member?: 用来判断一个S表达式是否在一个列表之内。
+
+  .. code-block:: scheme
+    
+     (define member?
+       (lambda (a lat)
+         (cond
+           ((null? lat) #f)
+           ((eq? a (car lat)) #t)
+           (else (member? a (cdr lat))))))
+    
+     ; CPS变换
+     (define col
+       (lambda (in out)
+         (not (null? in))))
+    
+     (define member?&co
+       (lambda (a lat col)
+         (cond
+           ((null? lat) #f)
+           ((eq? a (car lat)) (member?&co a
+                                          (cdr lat)
+                                          (lambda (in out)
+                                            (col (cons a in) out))))
+           (else (member?&co a
+                             (cdr lat)
+                             (lambda (in out)
+                               (col in (cons a out))))))))
+
+第三章: Cons the Magnificent
+----------------------------
+lat操作
+~~~~~~~
+应用
+````
++ rember: 将一个S表达式从一个列表中删除。
+
+  .. code-block:: scheme
+    
+     (define rember
+       (lambda (a lat)
+         (cond
+           ((null? lat) '())
+           ((eq? a (car lat)) (cdr lat))
+           (else (cons (car lat) (rember a (cdr lat)))))))
+
+  .. code-block:: scheme
+
+     (define col
+       (lambda (rmcount leftlat)
+         (display rmcount)
+         (newline)
+         (display leftlat)
+         (newline)
+         leftlat))
+    
+     (define rember&co
+       (lambda (a lat col)
+         (cond
+           ((null? lat) (col 0 '()))
+           ((eq? a (car lat)) (col 1 (cdr lat)))
+           (else (rember&co a
+                            (cdr lat)
+                            (lambda (rmcount leftlat)
+                              (col rmcount (cons (car lat) leftlat))))))))
+
++ firsts: 从一个列表中的获取其每个子列表的首个S表达式，并以列表形式返回
+
+  .. code-block:: scheme
+    
+     (define firsts
+       (lambda (l)
+         (cond
+           ((null? l) '())
+           (else (cons (car (car l)) (firsts (cdr l)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (first_ed)
+         (display first_ed)
+         (newline)
+         first_ed))
+    
+     (define firsts&co
+       (lambda (l col) (display l) (newline)
+         (cond
+         ((null? l) (col '()))
+         (else (firsts&co (cdr l)
+                          (lambda (first_ed)
+                            (col (cons (car (car l)) first_ed))))))))
+
++ insertR: 将一个S表达式插入到一个列表中指定S表达式的右边，
+  并返回修改后的列表 insertL: 基本同上，只不过是插入到左边
+
+  .. tip::
+     insert*函数的整体逻辑与rember是差不多的。
+
+  .. code-block:: scheme
+    
+     (define insertR
+       (lambda (new old lat)
+         (cond
+           ((null? lat) '())
+           ((eq? old (car lat)) (cons old (cons new (cdr lat))))
+           (else (cons (car lat) (insertR new old (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (newlat)
+         (display newlat)
+         (newline)
+         newlat))
+    
+     (define insertR&co
+       (lambda (new old lat col)
+         (cond
+           ((null? lat) (col '()))
+           ((eq? old (car lat))
+            (col (cons old (cons new (cdr lat)))))
+           (else (insertR&co new
+                             old
+                             (cdr lat)
+                             (lambda (newlat)
+                               (col (cons (car lat) newlat) )))))))
+
+  .. code-block:: scheme
+    
+     (define insertL
+       (lambda (new old lat)
+         (cond
+           ((null? lat) '())
+           ((eq? old (car lat)) (cons new lat))
+           (else (cons (car lat) (insertL new old (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (newlat)
+         (display newlat)
+         (newline)
+         newlat))
+    
+     (define insertL&co
+       (lambda (new old lat col)
+         (cond
+           ((null? lat) (col '()))
+           ((eq? old (car lat)) (col (cons new lat)))
+           (else (insertL&co new
+                             old
+                             (cdr lat)
+                             (lambda (newlat)
+                               (col (cons (car lat) newlat))))))))
+
++ subst: 用新的S表达式替代列表中指定的S表达式，
+  并返回修改后的列表 subst2:
+  用来替代列表中指定的两个S表达式
+  
+  .. tip::
+     subst*函数的整体逻辑也与rember是差不多的。
+
+  .. code-block:: scheme
+    
+     (define subst
+       (lambda (new old lat)
+         (cond
+           ((null? lat) '())
+           ((eq? old (car lat)) (cons new (cdr lat)))
+           (else (cons (car lat) (subst new old (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (newlat)
+         (display newlat)
+         (newline)
+         newlat))
+    
+     (define subst&co
+       (lambda (new old lat col)
+         (cond
+           ((null? lat) (col '()))
+           ((eq? old (car lat))
+           (col (cons new (cdr lat))))
+           (else (subst&co new
+                           old
+                           (cdr lat)
+                           (lambda (newlat)
+                             (col (cons (car lat) newlat))))))))
+
+  .. code-block:: scheme
+    
+     (define subst2
+       (lambda (new old1 old2 lat)
+         (cond
+           ((null? lat) '())
+           ((eq? old1 (car lat)) (cons new (cdr lat)))
+           ((eq? old2 (car lat)) (cons new (cdr lat)))
+           (else (cons (car lat) (subst2 new old1 old2 (cdr lat)))))))
+    
+     ;subst2简化版本
+     (define subst2
+       (lambda (new old1 old2 lat)
+         (cond
+           ((null? lat) '())
+           ((or (eq? old2 (car lat))
+                (eq? old1 (car lat)))
+            (cons new (cdr lat)))
+           (else (cons (car lat)
+                       (subst2 new old1 old2 (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (newlat)
+         (display newlat)
+         (newline)
+         newlat))
+    
+     (define subst2&co
+       (lambda (new old1 old2 lat col)
+         (cond
+           ((null? lat) (col '()))
+           ((or (eq? old1 (car lat))
+                (eq? old2 (car lat)))
+            (col (cons new (cdr lat))))
+           (else (subst&co new
+                           old1
+                           old2
+                           (cdr lat)
+                           (lambda (newlat)
+                             (col (cons (car lat) newlat))))))))
+
++ multirember: 基本同rember, 只不过是列表中所有符合的S表达式都会删除.
+
+  .. tip::
+     其逻辑基本是在rember逻辑上进行扩充的。
+
+  .. code-block:: scheme
+    
+     (define multirember
+       (lambda (a lat)
+         (cond
+           ((null? lat) '())
+           ((eq? a (car lat)) (multirember a (cdr lat)))
+           (else (cons (car lat) (multirember a (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+     (define col
+       (lambda (rmcount newlat)
+         (display rmcount)
+         (display " ")
+         (display newlat)
+         (newline)
+         newlat))
+    
+    (define multirember&co
+      (lambda (a lat col)
+        (cond
+         ((null? lat) (col 0 '()))
+         ((eq? a (car lat))
+          (multirember&co a (cdr lat) (lambda (rmcount newlat)
+                                        (col (+ rmcount 1) newlat))))
+         (else
+          (multirember&co a (cdr lat) (lambda (rmcount newlat)
+                                        (col rmcount (cons (car lat) newlat))))))))
+
+
+
++ multiinsertR: 基本同insertR,
+  只不过是列表中所有符合的s表达式都会插入其右边。
+  注意：其逻辑基本是在insertR逻辑上进行扩充的。
+
+.. code-block:: scheme
+    
+    (define multiinsertR
+      (lambda (new old lat)
+        (cond
+         ((null? lat) '())
+         ((eq? old (car lat))
+          (cons old (cons new (multiinsertR new old (cdr lat)))))
+         (else (cons (car lat) (multiinsertR new old (cdr lat)))))))
+
+.. code-block:: scheme
+    
+    (define col
+      (lambda (inscount newlat)
+        (display inscount)
+        (display " ")
+        (display newlat)
+        (newline)
+        newlat))
+    
+    (define multiinsertR&co
+      (lambda (new old lat col)
+        (cond
+         ((null? lat) (col 0 '()))
+         ((eq? old (car lat))
+            (multiinsertR&co new old (cdr lat) (lambda (inscount newlat)
+                                                 (col (+ inscount 1) (cons old (cons new newlat))))))
+         (else
+            (multiinsertR&co new old (cdr lat) (lambda (inscount newlat)
+                                                 (col inscount (cons (car lat) newlat))))))))
+
++ multiinsertL: 基本同insertL, 只不过是列表中所有符合的s表达式都会插入其左边.
+  注意：其逻辑基本是在insertL逻辑上进行扩充的。
+
+  .. code-block:: scheme
+    
+    (define multiinsertL
+      (lambda (new old lat)
+        (cond
+         ((null? lat) '())
+         ((eq? old (car lat))
+          (cons new (cons old (multiinsertL new old (cdr lat)))))
+         (else (cons (car lat) (multiinsertL new old (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (inscount newlat)
+        (display inscount)
+        (display " ")
+        (display newlat)
+        (newline)
+        newlat))
+    
+    (define mutlinsertL&co
+      (lambda (new old lat col)
+        (cond
+         ((null? lat) (col 0 '()))
+         ((eq? old (car lat))
+          (mutlinsertL&co new old (cdr lat) (lambda (inscount newlat)
+                                              (col (+ inscount 1)
+                                                   (cons new (cons old newlat))))))
+         (else
+          (mutlinsertL&co new old (cdr lat) (lambda (inscount newlat)
+                                              (col inscount
+                                                   (cons (car lat) newlat))))))))
+
+
+
++ multisubst: 基本同sbust, 只不过是列表中所有符合的s表达式都替换
+
+  .. code-block:: scheme
+    
+    (define multisubst
+      (lambda (new old lat)
+        (cond
+         ((null? lat) '())
+         ((eq? old (car lat))
+          (cons new (multisubst new old (cdr lat))))
+         (else (cons (car lat) (multisubst new old (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (stcount newlat)
+        (display stcount)
+        (display " ")
+        (display newlat)
+        (newline)
+        newlat))
+    
+    (define mutlsubst&co
+      (lambda (new old lat col)
+        (cond
+         ((null? lat) (col 0 '()))
+         ((eq? old (car lat))
+          (mutlisubst&co new old (cdr lat) (lambda (inscount newlat)
+                                              (col (+ inscount 1)
+                                                   (cons new newlat)))))
+         (else
+          (mutlisubst&co new old (cdr lat) (lambda (inscount newlat)
+                                              (col inscount
+                                                   (cons (car lat) newlat))))))))
+
+第四章: Numbers Games
+---------------------
+数字操作
+~~~~~~~~
+基本概念
+````````
++ 数字也是一个atom
+
++ number?: 判断一个S表达式是否为数字
+
++ tup: 列表中包含的每个s表达式都是数字的列表。
+
+应用
+````
++ add1: 对数字加1
+
++ sub1: 对数字减1
+
++ +: 将两个数字相加
+
+  .. code-block:: scheme
+    
+    (define +
+      (lambda (a b)
+        (cond
+         ((zero? b) a)
+         (else (add1 (+ a (sub1 b)))))))
+
+
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define myadd&co
+      (lambda (a b col)
+        (cond
+        ((zero? b) (col a))
+        (else (myadd&co a (- b 1) (lambda (num)
+                                    (col (+ num 1))))))))
+
++ -: 将两个数字相减
+
+  .. code-block:: scheme
+    
+    (define -
+      (lambda (a b)
+        (cond
+         ((zero? b) a)
+         (else (sub1 (- a (sub1 b)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define mysub&co
+      (lambda (a b col)
+        (cond
+         ((zero? b) (col a))
+         (else (mysub&co (- a 1) (- b 1) col)))))
+
++ addtup: 一个tup中的所有数字相加
+
+  .. code-block:: scheme
+    
+    (define addtup
+      (lambda (tup)
+        (cond
+         ((null? tup) 0)
+         (else (+ (car tup) (addtup (cdr tup)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define addtup&co
+      (lambda (tup col)
+        (cond
+         ((null? tup) (col 0))
+         (else
+          (addtup&co (cdr tup) (lambda (sum)
+                                 (col (+ sum (car tup)))))))))
+
++ \*: 将两个数字相乘
+
+  .. code-block:: scheme
+    
+    (define *
+      (lambda (n m)
+        (cond
+         ((zero? m) 0)
+         (else (+ n (* n (sub1 m)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define mymulti&co
+      (lambda (n m col)
+        (cond
+         ((zero? m) (col 0))
+         (else (mymulti&co n (- m 1) (lambda (num)
+                                       (+ num n)))))))
+
++ tup+: 将两个tup中相对的数字相加,然后返回相加后的tup
+
+  .. code-block:: scheme
+    
+    ; 该函数允许两个参数的长度不一样
+    (define tup+
+      (lambda (tup1 tup2)
+        (cond
+         ((null? tup2) tup1)
+         ((null? tup1) tup2)
+         (else (cons (+_ (car tup1) (car tup2))
+                         (tup+ (cdr tup1) (cdr tup2)))))))
+    
+    ; 该函数的两个参数长度必须一样
+    (define tup+
+      (lambda (tup1 tup2)
+        (cond
+         ((and (null? tup1) (null? tup2)) '())
+         (else (cons (+_ (car tup1) (car tup2))
+                     (tup+ (cdr tup1) (cdr tup2)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (newtup)
+        (display newtup)
+        (newline)
+        newtup))
+    
+    (define tup+&co
+      (lambda (tup1 tup2 col)
+        (cond
+         ((null? tup1) (col tup2))
+         ((null? tup2) (col tup1))
+         (else (tup+&co (cdr tup1) (cdr tup2) (lambda (newtup)
+                                                (col (cons (+ (car tup1) (car tup2)) newtup))))))))
+
++ <: 比较两个数字的大小 >: 比较两个数字的大小
+
+  .. code-block:: scheme
+    
+    (define >
+      (lambda (n m)
+        (cond
+         ((zero? n) #f)
+         ((zero? m) #t)
+         (else (> (sub1 n) (sub1 m))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define mylt&co
+      (lambda (n m col)
+        (cond
+         ((zero? n) (col #f))
+         ((zero? m) (col #t))
+         (else (mylt&co (- n 1) (- m 1) col)))))
+
+  .. code-block:: scheme
+    
+    (define <
+      (lambda (n m)
+        (cond
+         ((zero? m) #f)
+         ((zero? n) #t)
+         (else (< (sub1 n) (sub1 m))))))
+    ;基本同上
+
++ =: 比较两个数字是否相等
+
+  .. code-block:: scheme
+    
+    (define =
+      (lambda (n m)
+        (cond
+         ((zero? m) (zero? n))
+         ((zero? n) #f)
+         (else (= (sub1 n) (sub1 m))))))
+    
+    (define =
+      (lambda (n m)
+        (cond
+         ((> n m) #f)
+         ((< n m) #f)
+         (else #t))))
+
++ ^: 阶乘
+
+  .. code-block:: scheme
+    
+    (define ^
+      (lambda (n m)
+        (cond
+         ((zero? n) 0)
+         ((zero? m) 1)
+         (else (* n (^ n (sub1 m)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define mypower&co
+      (lambda (n m col)
+        (cond
+         ((zero? n) (col 0))
+         ((zero? m) (col 1))
+         (else (mypower&co n (- m 1) (lambda (num)
+                                       (col (* n num))))))))
+
++ /: 除
+
+  .. code-block:: scheme
+    
+    (define /
+      (lambda (n m)
+        (cond
+         ((< n m) 0)
+         (else (add1 (/ (- n m) m))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define mydiv&co
+      (lambda (n m col)
+        (cond
+         ((< n m) (col 0))
+         (else (mydiv&co (- n m) m (lambda (num)
+                                     (col (+ num 1))))))))
+
+
+综合操作
+````````
++ length: 返回一个lat的长度
+
+  .. code-block:: scheme
+    
+    (define length
+      (lambda (lat)
+        (cond
+         ((null? lat) 0)
+         (else (add1 (length (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define length&co
+      (lambda (lat col)
+        (cond
+         ((null? lat) (col 0))
+         (else (length&co (cdr lat) (lambda (num)
+                                      (col (+ num 1))))))))
+
++ pick: 根据传入的数字,获取其对应在lat中位置的S表达式
+
+  .. code-block:: scheme
+    
+    (define pick
+      (lambda (n lat)
+        (cond
+         ((zero? (sub1 n)) (car lat))
+         (else (pick (sub1 n) (cdr lat))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define pick&co
+      (lambda (n lat col)
+        (cond
+         ((null? lat) (col '()))
+         ((zero? (- n 1)) (col (car lat)))
+         (else (pick&co (- n 1) (cdr lat) col)))))
+
++ rempick: 根据传入的数字, 删除其对应在lat中位置的S表达式,并返回剩余列表
+
+  .. code-block:: scheme
+    
+    (define rempick
+      (lambda (n lat)
+        (cond
+         ((null? lat) '())
+         ((zero? (sub1 n)) (cdr lat))
+         (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define rempick&co
+      (lambda (n lat col)
+        (cond
+         ((null? lat) (col '()))
+         ((zero? (- n 1)) (col (cdr lat)))
+         (else (rempick&co (- n 1) (cdr lat) (lambda (newlat)
+                                               (col (cons (car lat) newlat))))))))
+
++ no-nums: 选出列表中的非数字S表达式, 并以列表形式返回
+
+  .. code-block:: scheme
+    
+    (define no-nums
+      (lambda (lat)
+        (cond
+         ((null? lat) '())
+         ((number? (car lat)) (no-nums (cdr lat)))
+         (else (cons (car lat) (no-nums (cdr lat)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define nonum&co
+      (lambda (lat col)
+        (cond
+         ((null? lat) (col '()))
+         ((number? (car lat))
+          (nonum&co (cdr lat) col))
+         (else (nonum&co (cdr lat) (lambda (newlat)
+                                     (col (cons (car lat) newlat))))))))
+
++ all-nums: 跟上面相反, 只返回数字列表
+
+  .. code-block:: scheme
+    
+    (define all-nums
+      (lambda (lat)
+        (cond
+         ((null? lat) '())
+         ((not (number? (car lat))) (all-nums (cdr lat)))
+         (else (cons (car lat) (all-nums (cdr lat)))))))
+    
+    ;逻辑基本同上
+
++ eqan?: 比较两个S表达式是否是相等
+
+  .. code-block:: scheme
+    
+    (define eqan?
+      (lambda (a1 a2)
+        (cond
+         ((and (number? a1) (number? a2))
+          (= a1 a2))
+         ((or (number? a1) (number? a2))
+          #f)
+         (else (eq? a1 a2)))))
+
++ occur?: 检查列表中有几个指定的S表达式
+
+  .. code-block:: scheme
+    
+    (define occur
+      (lambda (a lat)
+        (cond
+         ((null? lat) 0)
+         ((eqan? a (car lat))
+          (add1 (occur a (cdr lat))))
+         (else (occur a (cdr lat))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define occur&co
+      (lambda (n lat col)
+        (cond
+         ((null? lat) (col 0))
+         ((eq? n (car lat))
+          (occur&co n (cdr lat) (lambda (num)
+                                  (col (+ num 1)))))
+         (else
+          (occur&co n (cdr lat) col)))))
+
++ one?: 判断一个数字是否为1
+
+  .. code-block:: scheme
+    
+    (define one?
+      (lambda (n)
+        (cond
+         ((zero? n) #f)
+         (else (zero? (sub1 n))))))
+    
+    (define one?
+      (lambda (n)
+        (cond
+         (else (=_ n 1)))))
+
+第五章: \*Oh My Gawd\*: It's Full of Stars
+------------------------------------------
+
++ rember*: 基本同rember, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+    
+    (define rember*
+      (lambda (a l)
+        (cond
+         ((null? l) '())
+         ((atom? (car l))
+          (cond
+           ((eq? a (car l))
+            (rember* a (cdr l)))
+           (else (cons (car l) (rember* a (cdr l))))))
+         (else (cons (rember* a (car l))
+                     (rember* a (cdr l)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define rember*&co
+      (lambda (a l col)
+        (cond
+         ((null? l) (col '()))
+         ((atom? (car l))
+          (cond
+           ((eq? a (car l))
+            (rember*&co a (cdr l) col))
+           (else
+            (rember*&co a (cdr l) (lambda (newl)
+                                    (col (cons (car l) newl)))))))
+         (else
+          (rember*&co a (car l) (lambda (carl)
+                                  (rember*&co a (cdr l) (lambda (cdrl)
+                                                           (col (cons carl cdrl))))))))))
+
++ insertR*: 基本同insertR, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+    
+    (define insertR*
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (cons old (cons new (insertR* new old (cdr l)))))
+           (else (cons (car l) (insertR* new old (cdr l))))))
+         (else (cons (insertR* new old (car l))
+                     (insertR* new old (cdr l)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define insertR*&co
+      (lambda (new old l col)
+        (cond
+         ((null? l) (col '()))
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (insertR*&co new old (cdr l) (lambda (newl)
+                                           (col (cons old (cons new newl))))))
+           (else
+            (insertR*&co new old (cdr l) (lambda (newl)
+                                           (col (cons (car l) newl)))))))
+         (else
+          (insertR*&co new old (car l) (lambda (carl)
+                                         (insertR*&co new old (cdr l) (lambda (cdrl)
+                                                                        (col (cons carl cdrl))))))))))
+
++ occur*: 基本同occur, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+
+    
+    (define occur*
+      (lambda (a l)
+        (cond
+         ((null? l) 0)
+         ((atom? (car l))
+          (cond
+           ((eq? a (car l))
+            (add1 (occur* a (cdr l))))
+           (else (occur* a (cdr l)))))
+         (else (+_ (occur* a (car l))
+                    (occur* a (cdr l)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define occur*&co
+      (lambda (a l col)
+        (cond
+         ((null? l) (col 0))
+         ((atom? (car l))
+          (cond
+           ((eq? a (car l))
+            (occur*&co a (cdr l) (lambda (num)
+                                   (col (+ num 1)))))
+           (else
+            (occur*&co a (cdr l) col))))
+         (else
+          (occur*&co a (car l) (lambda (carnum)
+                                 (occur*&co a (cdr l) (lambda (cdrnum)
+                                                        (col (+ carnum cdrnum))))))))))
+
++ subst*: 基本同subst, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+    
+    (define subst*
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (cons new (subst* new old (cdr l))))
+           (else (cons (car l) (subst* new old (cdr l))))))
+         (else (cons (subst* new old (car l))
+                     (subst* new old (cdr l)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define subst*&co
+      (lambda (new old l col)
+        (cond
+         ((null? l) (col l))
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (subst*&co new old (cdr l) (lambda (newl)
+                                         (col (cons new newl)))))
+           (else
+            (subst*&co new old (cdr l) (lambda (newl)
+                                         (col (cons (car l) newl)))))))
+         (else
+          (subst*&co new old (car l) (lambda (carl)
+                                       (subst*&co new old (cdr l) (lambda (cdrl)
+                                                                    (col (cons carl cdrl))))))))))
+
++ insertL*: 基本同insertL, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+    
+    (define insertL*
+      (lambda (new old l)
+        (cond
+         ((null? l) '())
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (cons new (cons old (insertL* new old (cdr l)))))
+           (else (cons (car l) (insertL* new old (cdr l))))))
+         (else (cons (insertL* new old (car l))
+                     (insertL* new old (cdr l)))))))
+
+  .. code-block:: scheme
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define insertL*&co
+      (lambda (new old l col)
+        (cond
+         ((null? l) (col l))
+         ((atom? (car l))
+          (cond
+           ((eq? old (car l))
+            (insertL*&co new old (cdr l) (lambda (newl)
+                                           (col (cons new (cons old newl))))))
+           (else
+            (insertL*&co new old (cdr l) (lambda (newl)
+                                           (col (cons old newl)))))))
+         (else
+          (insertL*&co new old (car l) (lambda (carl)
+                                         (insertL*&co new old (cdr l) (lambda (cdrl)
+                                                                        (col (cons carl cdrl))))))))))
+
++ member*: 基本同member, 但其处理的对象包括一个嵌套的列表
+
+  .. code-block:: scheme
+    
+    (define member*
+      (lambda (a l)
+        (cond
+         ((null? l) #f)
+         ((atom? a (car l))
+          (cond
+           ((eq? a (car l)) #t)
+           (else (member* a (cdr l)))))
+         (else (or (member* a (car l))
+                   (member* a (cdr l)))))))
+
+  .. code-block:: scheme
+
+    
+    (define col
+      (lambda (num)
+        (display num)
+        (newline)
+        num))
+    
+    (define member*&co
+      (lambda (a l col)
+        (cond
+         ((null? l) (col #f))
+         ((atom? (car l))
+          (cond
+           ((eq? a (car l))
+            (col #t))
+           (else
+            (member*&co a (cdr l) col))))
+         (else
+          (member*&co a (car l) (lambda (incar)
+                                  (member*&co a (cdr l) (lambda (incdr)
+                                                          (col (or incar incdr))))))))))
+
++ leftmost: 找出不包含空列表的列表/嵌套列表中的最左边的一个atom
+
+  .. code-block:: scheme
+    
+    (define leftmost
+      (lambda (l)
+        (cond
+         ((atom? (car l)) (car l))
+         (else (leftmost (car l))))))
+
++ eqlist?: 判断两个列表/嵌套列表是否相同
+
+  .. tip::
+     作者通过equal?来简化了eqlist?，
+     而且equal?也是通过eqlist?来实现的。
+     只当函数正确的前提下再进行简化/优化。
+
+  .. code-block:: scheme
+
+    
+    (define eqlist?
+      (lambda (l1 l2)
+        (cond
+         ((and (null? l1) (null? l2)) #t)
+         ((and (null? l1) (atom? (car l2))) #f)
+         ((null? l1) #f)
+         ((and (atom? (car l1)) (null? l2)) #f)
+         ((and (atom? (car l1)) (atom? (car l2)))
+          (and (eqan? (car l1) (car l2))
+               (eqlist? (cdr l1) (cdr l2))))
+         ((atom? (car l1)) #f)
+         ((null? l2) #f)
+         ((atom? (car l2)) #f)
+         (else
+          (and (eqlist? (car l1) (car l2))
+               (eqlist? (cdr l1) (cdr l2)))))))
+    
+    (define eqlist?
+      (lambda (l1 l2)
+        (cond
+         ((and (null? l1) (null? l2)) #t)
+         ((or (null? l1) (null? l2)) #f)
+         ((and (atom? (car l1))
+               (atom? (car l2)))
+          (and (eqan? (car l1) (car l2))
+               (eqlist? (cdr l1) (cdr l2))))
+         ((or (atom? (car l1))
+              (atom? (car l2))) #f)
+         (else (and (eqlist? (car l1) (car l2))
+                    (eqlist? (cdr l1) (cdr l2)))))))
+
+  .. code-block:: scheme
+    
+    (define equal?
+      (lambda (s1 s2)
+        (cond
+         ((and (atom? s1) (atom? s2))
+          (eqan? s1 s2))
+         ((or (atom? s1) (atom? s2)) #f)
+         (else (eqlist? s1 s2)))))
+
+  .. code-block:: scheme
+    
+    (define eqlist?
+      (lambda (l1 l2)
+        (cond
+         ((and (null? l1) (null? l2)) #t)
+         ((or (null? l1) (null? l2)) #f)
+         (else
+          (and (equal? (car l1) (car l2))
+               (eqlist? (cdr l1) (cdr l2)))))))
+
++ rember: 重写之前简单的rember, 参数s代表任何S表达式,参数l代码任何列表
+
+  .. code-block:: scheme
+    
+    (define rember
+      (lambda (s l)
+        (cond
+         ((null? l) '())
+         ((equal? s (car l)) (cdr l))
+         (else (cons (car l) (rember s (cdr l)))))))
+
+第六章: Shadows
+---------------
+这一章讲的是有关算术表达式的相关内容,
+它通过帮助函数来 支持前缀\中缀\后缀算术表达式.
+但我这里只写了前缀表达式的代码.
+
+应用
+~~~~
++ 判断一个S表达式是否为算术表达式
+
+  .. code-block:: scheme
+    
+    (define numbered?
+      (lambda (aexp)
+        (cond
+         ((atom? aexp) (number? aexp))
+         ((or (eq? (car (cdr aexp)) '+)
+              (eq? (car (cdr aexp)) '*)
+              (eq? (car (cdr aexp)) '^))
+          (and (numberd? (car aexp))
+               (numberd? (car (cdr (cdr aexp))))))
+         (else #f))))
+
++ ^: 倍数
+
+  .. code-block:: scheme
+
+    (define ^
+      (lambda (n m)
+        (expt n m)))
+
++ value: 获取一个算术表达式的值
+
+  .. code-block:: scheme
+    
+    (define value
+      (lambda (nexp)
+        (cond
+         ((atom? nexp) nexp)
+         ((eq? (car nexp) '+)
+          (+ (value (cdr nexp))
+             (value (cdr (cdr nexp)))))
+         ((eq? (car nexp) '*)
+          (* (value (cdr nexp))
+             (value (cdr (cdr nexp)))))
+         (else (^ (value (cdr nexp))
+                  (value (cdr (cdr nexp))))))))
+    
+    ; 帮助函数
+    (define 1st-sub-exp
+      (lambda (aexp)
+        (car (cdr aexp))))
+    
+    ; 帮助函数
+    (define 2nd-sub-exp
+      (lambda (aexp)
+        (car (cdr (cdr aexp)))))
+    
+    ; 帮助函数
+    (define operator
+      (lambda (aexp)
+        (car aexp)))
+    
+    ; 使用帮助函数重写的value函数
+    ; 这样修改后的函数, 其实即可以用在前缀,也可以用在后缀表达式上
+    ; 只要修改几个帮助函数即可
+    (define value
+      (lambda (nexp)
+        (cond
+         ((atom? nexp) nexp)
+         ((eq? (operator nexp) '+)
+          (+ (value (1st-sub-exp nexp))
+             (value (2nd-sub-exp nexp))))
+         ((eq? (operator nexp) '*)
+          (* (value (1st-sub-exp nexp))
+             (value (2nd-sub-exp))))
+         (else (^ (value (1st-sub-exp nexp))
+                  (value (2nd-sub-exp nexp)))))))
+
++ 接下来作者用()来表示0, (())表示1, (() ())表示2…
+  然后定义了对应的原语函数: sero?, edd1, zub1,
+
+第七章: Friends and Relations
+-----------------------------
+set操作
+~~~~~~~
+基本概念
+````````
+
++ set: 集合, 类似于列表, 但是它其中的元素唯一
+
+
+应用
+````
+
++ set?: 判断一个S表达式是否为set
+
+  .. code-block:: scheme
+    
+    (define set?
+      (lambda (lat)
+        (cond
+         ((null? lat) #t)
+         ((member? (car lat) (cdr lat)) #f)
+         (else (set? (cdr lat))))))
+
++ makeset: 生成一个set
+
+  .. code-block:: scheme
+    
+    (define makeset
+      (lambda (lat)
+        (cond
+         ((null? lat) '())
+         ((member? (car lat) (cdr lat))
+          (makeset (cdr lat)))
+         (else (cons (car lat) (makeset (cdr lat)))))))
+    
+    ;使用multirember, 另外一种思路
+    (define makeset
+      (lambda (lat)
+        (cond
+         ((null? lat) '())
+         (else (cons (car lat)
+                     (makeset (multirember (car lat)
+                                           (cdr lat))))))))
+
+
++ subset?: 判断set1是否是set2的子集
+
+  .. code-block:: scheme
+    
+    (define subset?
+      (lambda (set1 set2)
+        (cond
+         ((null? set1) #t)
+         ((member? (car set1) set2)
+          (subset? (cdr set1) set2))
+         (else #f))))
+    
+    (define subset?
+      (lambda (set1 set2)
+        (cond
+         ((null? set1) #t)
+         ((and (member? (car set1) set2)
+               (subset? (cdr set1) set2))))))
+
++ eqset?: 判断两个set是否相等
+
+  .. code-block:: scheme
+    
+    (define eqset?
+      (lambda (set1 set2)
+        ((and (subset? set1 set2)
+              (subset? set2 set1)))))
+
++ interset?: 判断set1是否至少有一个S表达式在set2中
+
+  .. code-block:: scheme
+    
+    (define intersect?
+      (lambda (set1 set2)
+        (cond
+         ((null? set1) #t)
+         ((member? (car set1) set2) #t)
+         (else (intersect? (cdr set1) set2)))))
+    
+    (define intersect?
+      (lambda (set1 set2)
+        (cond
+         ((null? set1) #t)
+         ((or (member? (car set1) set2)
+              (intersect? (cdr set1) set2))))))
+
++ interset: 求两个set的交集
+
+  .. code-block:: scheme
+    
+    (define intersect
+      (lambda (set1 set2)
+        (cond
+         ((or (null? set1)
+              (null? set2))
+          '())
+         ((member? (car set1) set2)
+          (cons (car set1)
+                (intersect (cdr set1) set2)))
+         (else (intersect (cdr set1) set2)))))
+
++ union: 求两个set的并集
+
+  .. code-block:: scheme
+    
+    (define union
+      (lambda (set1 set2)
+        (cond
+         ((null? set1) set2)
+         ((null? set2) set1)
+         ((member? (car set1) set2)
+          (union (cdr set1) set2))
+         (else (cons (car set1)
+                     (union (cdr set1) set2))))))
+
++ intersectall: 获取set中每个子set的交集
+
+  .. code-block:: scheme
+    
+    (define intersectall
+      (lambda (l-set)
+        (cond
+         ((null? (cdr l-set)) (car l-set))
+         (else (intersect (car l-set)
+                          (intersectall (cdr l-set)))))))
+
+
+pair操作
+~~~~~~~~~~
+基本概念
+``````````
++ pair: 点对, 只包含两个S表达式的列表
+
+应用
+````
++ a-pair?: 判断一个S表达式是否为pair
+
+  .. code-block:: scheme
+    
+    (define a-pair?
+      (lambda (x)
+        (cond
+         ((atom? x) #f)
+         ((null? x) #f)
+         ((null? (cdr lat) #f))
+         ((null? (cdr (cdr lat))) #t)
+         (else #f))))
+
++ first: 获取pair的第一个S表达式
+
+  .. code-block:: scheme
+
+    
+    (define first
+      (lambda (p)
+        (car p)))
+
+
+
++ second: 获取pair的第二个S表达式
+
+  .. code-block:: scheme
+
+    
+    (define second
+      (lambda (p)
+        (car (cdr p))))
+
+
+
++ build: 生成一个pair
+
+  .. code-block:: scheme
+
+    
+    (define build
+      (lambda (s1 s2)
+        (cons s1 (cons s2 '()))))
+
+rel操作
+~~~~~~~
+基本概念
+````````
++ rel: 是一个内部嵌套pair的list, 但是其所有子pair是唯一的
+
+fun操作
+~~~~~~~
+基本概念
+````````
++ fun: 同rel, 但其所有子pair的第一个元素也是唯一的, 类似于字典(key->value)
+
+应用
+````
++ fun?: 判断一个S表达式是否为fun
+
+  .. code-block:: scheme
+    
+    (define fun?
+      (lambda (rel)
+        (set? (firsts rel))))
+
++ revrel: 将fun中所有子pair的两个元素对调
+
+  .. code-block:: scheme
+
+    
+    (define revrel
+      (lambda (rel)
+        ((null? rel) '())
+        (else (cons (build (second (car rel))
+                           (first (car rel)))
+                    (revrel (cdr rel))))))
+    
+    ; 如果将其中的pair中两元素对调写成一个单独的函数
+    ; 则revrel看起来会更简洁明了
+    (define revpair
+      (lambda (pair)
+        (build (second pair)
+               (first pair))))
+    
+    (define revrel
+      (lambda (rel)
+        ((null? rel) '())
+        (else (cons (revpair (car rel))
+                    (revrel (cdr rel))))))
+
+
+fullfun操作
+~~~~~~~~~~~
+基本概念
+````````
++ fullfun: 基本同fun, 但其所有子pair的第二个元素也是唯一的
+
+
+应用
+````
++ fullfun?: 判断一个S表达式是否为fullfun
+
+  .. code-block:: scheme
+
+    
+    (define fullfun?
+      (lambda (fun)
+        (set? (seconds fun))))
+    
+    (define fullfun?
+      (lambda (fun)
+        (fun? (revrel fun))))
+
+
+第八章: Lambda the Ultimate
+---------------------------
+
+这一章才算开始高能, 下面的九,十章则更是要下一翻功夫了.
+说高能, 并不是指有多难(除了连续概念的讲解),
+而是指这一章揭示了很多更深入的东西, 更深入的抽象.
+
++ rember-f: 基本同rember, 但是其中的eq/equal比较函数,
+  当作参数传入进来, 具体的比较操作就抽象比来,
+  可以用来支持各种对象/类型的删除操作.
+  只需要你定义好其对象/类型的eq/equal比较函数即可.
+
+  .. code-block:: scheme
+
+    
+    (define rember-f
+      (lambda (test? a l)
+        (cond
+         ((null? l) '())
+         ((test? a (car l)) (cdr l))
+         (else (cons (car l)
+                     (rember-f (test? a (cdr l))))))))
+    
+    ; 定义成为一个高阶函数
+    (define rember-f
+      (lambda (test?)
+        (lambda (a l)
+          (cond
+           ((null? l) '())
+           ((test? a (car l)) (cdr l))
+           (else (cons (car l)
+                       (rember-f (test? a (cdr l)))))))))
+    
+    (define rember-eq?
+      (lambda (a l)
+        (rember-f eq?)))
+    
+    (define rember-equal?
+      (lambda (a l)
+        (rember-f equal?)))
+
+
++ eq?-c: 返回一个函数, 用来与固定S表达式比较.
+
+  .. code-block:: scheme
+
+    
+    (define eq?-c
+      (lambda (a)
+        (lambda (x)
+          (eq? x a))))
+    
+    ; 与salad比较
+    (define eq?-salad
+    (eq?-c 'salad))
+
+
++ insert-q: 返回一个函数, 具体的操作函数当作参数传入
+
+  .. code-block:: scheme
+
+    
+    (define seqL
+      (lambda (new old l)
+        (cons new (cons old l))))
+
+
+
+  .. code-block:: scheme
+
+    
+    (define seqR
+      (lambda (new old l)
+        (cons old (cons new l))))
+
+
+
+  .. code-block:: scheme
+
+    
+    (define seqS
+      (lambda (new old l)
+        (cons new l)))
+
+  .. code-block:: scheme
+
+    
+    (define insert-g
+      (lambda (seq)
+        (lambda (new old l)
+          (cond
+           ((null? l) '())
+           ((eq? (car l) old)
+            (seq new old (cdr l)))
+           (else (cons (car l)
+                       ((insert-g seq) new old (cdr l))))))))
+
+
+
+  .. code-block:: scheme
+
+    
+    (define insertL
+      (insert-g seqL))
+
+
+
+  .. code-block:: scheme
+
+    
+    (define insertR
+      (insert-g seqR))
+
+  .. code-block:: scheme
+
+    (define subst
+      (insert-g seqS))
+
++ value: 重写之前的value, 将里面的操作抽象出来
+
+  .. code-block:: scheme
+
+    
+    (define atom-to-function
+      (lambda (x)
+        (cond
+         ((eq? x '+) +)
+         ((eq? x '*) *)
+         (else ^))))
+
+  .. code-block:: scheme
+
+    (define value
+      (lambda (nexp)
+        (cond
+         ((atom? nexp) nexp)
+         (else
+          ((atom-to-function (operator nexp))
+           (value (1st-sub-exp nexp))
+           (value (2nd-sub-exp nexp)))))))
+
++ multirember-f: 同上, 用test?代替eq?/equal?
+
+  .. code-block:: scheme
+    
+    (define multirember-f
+      (lambda (test?)
+        (lambda (a lat)
+          (cond
+           ((null? lat) '())
+           ((test? a (car lat))
+            ((multirember-f test?) a (cdr lat)))
+           (else (cons (car lat)
+                       ((multirember-f test?) a (cdr lat))))))))
+
+  .. code-block:: scheme
+    
+    (define multirember-eq?
+      (multirember-f eq?))
+
+  .. code-block:: scheme
+    
+    (define multirember-equal?
+      (multirember-f equal?))
+
++ multiremberT: 基本同上,
+  不过test?可以带参数，
+  将每次递归都不会变化的test?和a参数都存放到test?函数中.
+  以后写函数, 可以将哪些参数是不变的, 哪些参数是变化的区分开来.
+
+  .. code-block:: scheme
+
+    
+    (define multiremberT
+      (lambda (test? lat)
+        (cond
+         ((null? lat) '())
+         ((test? (car lat))
+          (multiremberT test? (cdr lat)))
+         (else (cons (car lat)
+                     (multiremberT test? (cdr lat)))))))
+
+
+
++ multirember&co: 将具体的操作放入col中
+  其中的col相当于一个收集器(collector),
+  它将lat中和a参数不相同的 放入col的第一个参数中,
+  相同的放入第二个参数中.
+
+  .. code-block:: scheme
+
+    
+    (define multirember&co
+      (lambda (a lat col)
+        (cond
+         ((null? lat)
+          (col '() '()))
+         ((eq? (car lat) a)
+          (multirember&co a
+                          (cdr lat)
+                          (lambda (newlat seen)
+                            (col newlat
+                                 (cons (car lat)
+                                       seen)))))
+         (else
+          (multirember&co a
+                          (cdr lat)
+                          (lambda (newlat seen)
+                            (col (cons (car lat)
+                                       newlat)
+                                 seen)))))))
+
+
+
+  .. code-block:: scheme
+
+    
+    (define a-friend
+      (lambda (x y)
+        (null? y)))
+
++ multiinsertLR: 将new插入到oldL的左边,oldR的右边.
+
+
+  .. code-block:: scheme
+
+    (define multiinsertLR
+      (lambda (new oldL oldR lat)
+        (cond
+         ((null? lat) '())
+         ((eq? oldL (car lat))
+          (cons new (cons oldL (multiinsertLR new oldL oldR (cdr lat)))))
+         ((eq? oldR (car lat))
+          (cons oldR (cons new (multiinsertLR new oldL oldR (cdr lat)))))
+         (else
+          (cons (car lat) (multiinsertLR new oldL oldR (cdr lat)))))))
+
++ multiinsertLR&co: 将具体的操作放入col中
+  col的newlat参数存放最后插入new参数后的newlat,
+  L参数是在oldL参数左边插入的次数, R参数是在oldR参数右边插入的次数.
+
+  .. code-block:: scheme
+    
+    (define multiinsertLR&co
+      (lambda (new oldL oldR lat col)
+        (cond
+         ((null? lat)
+          (col '() 0 0))
+         ((eq? oldL (car lat))
+          (multiinsertLR&co new oldL oldR (cdr lat)
+                            (lambda (newlat L R)
+                              (col (cons new (cons oldL newlat)) (add1 L) R))))
+         ((eq? oldR (car lat))
+          (multiinsertLR&co new oldL oldR (cdr lat)
+                            (lambda (newlat L R)
+                              (col (cons oldR (cons new newlat)) L (add1 R)))))
+         (else
+          (multiinsertLR&co new oldL oldR (cdr lat)
+                            (lambda (newlat L R)
+                              (col (car lat) L R)))))))
+
+
+
++ evens-only*: 找出嵌套队列中所有的偶数
+
+  .. code-block:: scheme
+
+     ; 此处要用之前定义的运算符号,用系统自带的会出错
+     ; lisp支持分数, 即3/2不缺失其精度
+     (define even?
+       (lambda (n)
+         (=_ (*_ (/_ n 2) 2) n)))
+
+  .. code-block:: scheme
+    
+     (define evens-only*
+       (lambda (l)
+         (cond
+           ((null? l) '())
+           ((atom? (car l))
+           (cond
+             ((even? (car l))
+              (cons (car l)
+                    (evens-only* (cdr l))))
+             (else
+               (evens-only* (cdr l)))))
+         (else
+           (cons (evens-only* (car l))
+                 (evens-only* (cdr l)))))))
+
++ evens-only*&co: 将具体的操作放入col中
+
+  .. code-block:: scheme
+    
+     (define evens-only*&co
+       (lambda (l col)
+         (cond
+           ((null? l) (col '() 1 0))
+           ((atom? (car l))
+            (cond
+              ((even? (car l))
+               (evens-only*&co (cdr l)
+                               (lambda (newlat m s)
+                                 (col (cons (car l) newlat)
+                                      (* (car l) m)
+                                      s))))
+              (else
+                (evens-only*&co (cdr l)
+                                (lambda (newlat m s)
+                                (col newlat
+                                     m
+                                     (+ (car l) s)))))))
+           (else
+             (evens-only*&co (car l)
+                            (lambda (al am as)
+                              (evens-only*&co (cdr l)
+                                              (lambda (dl dm ds)
+                                                (col (cons al dl)
+                                                     (* am dm)
+                                                     (+ as ds))))))))))
+
++ 这里建议一下，最好将从第二章开始的所有递归函数都用cps形式手动重写一遍
+
+第九章: … and Again, and Again, and Again, …
+--------------------------------------------
+
++ looking/keep-looking:
+
+  .. code-block:: scheme
+    
+     (define looking
+       (lambda (a lat)
+         (keep-looing a (pick 1 lat) lat)))
+    
+     (define keep-looing
+       (lambda (a sorn lat)
+         (cond
+           ((number? sorn)
+            (keep-looking a (pick sorn lat) lat))
+           (else (eq? sorn a)))))
+
++ shift:
+
+  .. code-block:: scheme
+    
+     (define shift
+       (lambda (pair)
+         (build (first (first pair))
+                (build (second (first pair))
+                       (second pair)))))
+
++ align:
+
++ 接下来讲的是停机理论和Y算子的概念, 基本都是理论上的东西
+
+第十章: What Is the Value of All of This?
+-----------------------------------------
+
+.. code-block:: scheme
+    
+   (define lookup-in-entry
+     (lambda (name entry entry-f)
+       (lookup-in-entry-help name
+                             (first entry)
+                             (second entry)
+                             entry-f)))
+
+.. _Org: http://orgmode.org
+.. _Emacs: http://www.gnu.org/software/emacs/
+.. _Validate: http://validator.w3.org/check?uri=referer
+
+

@@ -1,0 +1,566 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>10. Friends and Relations &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="11. Lambda the Ultimate" href="chapter_08.html" />
+    <link rel="prev" title="9. Shadows" href="chapter_06.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_08.html" title="11. Lambda the Ultimate"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_06.html" title="9. Shadows"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="friends-and-relations">
+<h1><a class="toc-backref" href="#id5">10. Friends and Relations</a><a class="headerlink" href="#friends-and-relations" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#friends-and-relations" id="id5">Friends and Relations</a><ul>
+<li><a class="reference internal" href="#set" id="id6">set</a><ul>
+<li><a class="reference internal" href="#id1" id="id7">set?</a></li>
+<li><a class="reference internal" href="#makeset" id="id8">makeset</a></li>
+<li><a class="reference internal" href="#subset" id="id9">subset?</a></li>
+<li><a class="reference internal" href="#eqset" id="id10">eqset?</a></li>
+<li><a class="reference internal" href="#interset" id="id11">interset?</a></li>
+<li><a class="reference internal" href="#id2" id="id12">interset</a></li>
+<li><a class="reference internal" href="#union" id="id13">union</a></li>
+<li><a class="reference internal" href="#intersectall" id="id14">intersectall</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pair" id="id15">pair</a><ul>
+<li><a class="reference internal" href="#a-pair" id="id16">a-pair?</a></li>
+<li><a class="reference internal" href="#first" id="id17">first</a></li>
+<li><a class="reference internal" href="#second" id="id18">second</a></li>
+<li><a class="reference internal" href="#build" id="id19">build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rel" id="id20">rel</a></li>
+<li><a class="reference internal" href="#fun" id="id21">fun</a><ul>
+<li><a class="reference internal" href="#id3" id="id22">fun?</a></li>
+<li><a class="reference internal" href="#revrel" id="id23">revrel</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fullfun" id="id24">fullfun</a><ul>
+<li><a class="reference internal" href="#id4" id="id25">fullfun?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>介绍了Scheme中的几种常见数据结构。
+
+为最后一章节的Scheme解释器实现打基础。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="set">
+<h2><a class="toc-backref" href="#id6">10.1. set</a><a class="headerlink" href="#set" title="Permalink to this headline">¶</a></h2>
+<p>集合, 类似于列表, 但是它包含的每个元素在集合内都是唯一的</p>
+<div class="section" id="id1">
+<h3><a class="toc-backref" href="#id7">10.1.1. set?</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>判断一个S表达式是否为set</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; set?: lat -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">set?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">set?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">set?&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">set?&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="makeset">
+<h3><a class="toc-backref" href="#id8">10.1.2. makeset</a><a class="headerlink" href="#makeset" title="Permalink to this headline">¶</a></h3>
+<p>生成一个set</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; makeset: lat -&gt; set</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">makeset</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">makeset</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">makeset</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+
+<span class="c1">;使用multirember, 另外一种思路</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">makeset</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">makeset</span> <span class="p">(</span><span class="nf">multirember</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                                       <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">set</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">makeset&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">makeset&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">col</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="nv">makeset&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newset</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newset</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subset">
+<h3><a class="toc-backref" href="#id9">10.1.3. subset?</a><a class="headerlink" href="#subset" title="Permalink to this headline">¶</a></h3>
+<p>判断set1是否是set2的子集</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; subset?: set set -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subset?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">subset?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+
+<span class="c1">; 另一版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subset?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+           <span class="p">(</span><span class="nf">subset?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">subset&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">subset&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="eqset">
+<h3><a class="toc-backref" href="#id10">10.1.4. eqset?</a><a class="headerlink" href="#eqset" title="Permalink to this headline">¶</a></h3>
+<p>判断两个set是否相等</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; eqset?: set set -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">eqset?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">subset?</span> <span class="nv">set1</span> <span class="nv">set2</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">subset?</span> <span class="nv">set2</span> <span class="nv">set1</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interset">
+<h3><a class="toc-backref" href="#id11">10.1.5. interset?</a><a class="headerlink" href="#interset" title="Permalink to this headline">¶</a></h3>
+<p>判断set1是否至少有一个S表达式在set2中</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; interset?: set set -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">intersect?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersect?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)))))</span>
+
+<span class="c1">; 另一版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">intersect?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">intersect?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">intersect?&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersect?&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3><a class="toc-backref" href="#id12">10.1.6. interset</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>求两个set的交集</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; set set -&gt; set</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">intersect</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span>
+          <span class="p">(</span><span class="nb">null? </span><span class="nv">set2</span><span class="p">))</span>
+      <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">intersect</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersect</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">set</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">intersect&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">set2</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">intersect&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span>
+                    <span class="nv">set2</span>
+                    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newset</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">newset</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersect&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="union">
+<h3><a class="toc-backref" href="#id13">10.1.7. union</a><a class="headerlink" href="#union" title="Permalink to this headline">¶</a></h3>
+<p>求两个set的并集</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; union: set set -&gt; set</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">union</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set2</span><span class="p">)</span> <span class="nv">set1</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">union</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">union</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">set</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">union&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set1</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set1</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">set2</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">set2</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">set1</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">member?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">union&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">set2</span> <span class="nv">col</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="nv">union&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">set1</span><span class="p">)</span>
+                    <span class="nv">set2</span>
+                    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newset</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">set1</span><span class="p">)</span> <span class="nv">newset</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="intersectall">
+<h3><a class="toc-backref" href="#id14">10.1.8. intersectall</a><a class="headerlink" href="#intersectall" title="Permalink to this headline">¶</a></h3>
+<p>获取set中每个子set的交集</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; intersectall: set -&gt; set</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">intersectall</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l-set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l-set</span><span class="p">))</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l-set</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersect</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l-set</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">intersectall</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l-set</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">set</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">set</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">intersectall&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l-set</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">l-set</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l-set</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">intersectall&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l-set</span><span class="p">)</span>
+                            <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newset</span><span class="p">)</span>
+                              <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">interset</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l-set</span><span class="p">)</span> <span class="nv">newset</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="pair">
+<h2><a class="toc-backref" href="#id15">10.2. pair</a><a class="headerlink" href="#pair" title="Permalink to this headline">¶</a></h2>
+<p>点对, 只包含两个S表达式的列表</p>
+<div class="section" id="a-pair">
+<h3><a class="toc-backref" href="#id16">10.2.1. a-pair?</a><a class="headerlink" href="#a-pair" title="Permalink to this headline">¶</a></h3>
+<p>判断一个S表达式是否为pair</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">a-pair?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">x</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">x</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="first">
+<h3><a class="toc-backref" href="#id17">10.2.2. first</a><a class="headerlink" href="#first" title="Permalink to this headline">¶</a></h3>
+<p>获取pair的第一个S表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">first</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">p</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="nv">p</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="second">
+<h3><a class="toc-backref" href="#id18">10.2.3. second</a><a class="headerlink" href="#second" title="Permalink to this headline">¶</a></h3>
+<p>获取pair的第二个S表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">second</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">p</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">p</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build">
+<h3><a class="toc-backref" href="#id19">10.2.4. build</a><a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
+<p>生成一个pair</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">build</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">s1</span> <span class="nv">s2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="nv">s1</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">s2</span> <span class="o">&#39;</span><span class="p">()))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="rel">
+<h2><a class="toc-backref" href="#id20">10.3. rel</a><a class="headerlink" href="#rel" title="Permalink to this headline">¶</a></h2>
+<p>是一个内部嵌套pair的list, 但是其所有子pair是唯一的</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">相当于一个pair集合</p>
+</div>
+</div>
+<div class="section" id="fun">
+<h2><a class="toc-backref" href="#id21">10.4. fun</a><a class="headerlink" href="#fun" title="Permalink to this headline">¶</a></h2>
+<p>基本同rel, 但其所有子pair的第一个元素也是唯一的</p>
+<div class="section" id="id3">
+<h3><a class="toc-backref" href="#id22">10.4.1. fun?</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>判断一个S表达式是否为fun</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">fun?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rel</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">set?</span> <span class="p">(</span><span class="nf">firsts</span> <span class="nv">rel</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="revrel">
+<h3><a class="toc-backref" href="#id23">10.4.2. revrel</a><a class="headerlink" href="#revrel" title="Permalink to this headline">¶</a></h3>
+<p>将rel中所有子pair的两个元素对调</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; revrel: rel -&gt; rel</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">revrel</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rel</span><span class="p">)</span>
+    <span class="p">((</span><span class="nb">null? </span><span class="nv">rel</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+    <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">second</span> <span class="p">(</span><span class="nb">car </span><span class="nv">rel</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nf">first</span> <span class="p">(</span><span class="nb">car </span><span class="nv">rel</span><span class="p">)))</span>
+                <span class="p">(</span><span class="nf">revrel</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">rel</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<p>如果将其中的pair中两元素对调写成一个单独的函数，则revrel看起来会更简洁明了。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">revpair</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">pair</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">build</span> <span class="p">(</span><span class="nf">second</span> <span class="nv">pair</span><span class="p">)</span>
+           <span class="p">(</span><span class="nf">first</span> <span class="nv">pair</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">revrel</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rel</span><span class="p">)</span>
+    <span class="p">((</span><span class="nb">null? </span><span class="nv">rel</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+    <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">revpair</span> <span class="p">(</span><span class="nb">car </span><span class="nv">rel</span><span class="p">))</span>
+                <span class="p">(</span><span class="nf">revrel</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">rel</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rel</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">rel</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">rel</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">revrel&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rel</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">((</span><span class="nb">null? </span><span class="nv">rel</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+    <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">revrel&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">rel</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newrel</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">revpair</span> <span class="p">(</span><span class="nb">car </span><span class="nv">rel</span><span class="p">))</span>
+                                  <span class="nv">newrel</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="fullfun">
+<h2><a class="toc-backref" href="#id24">10.5. fullfun</a><a class="headerlink" href="#fullfun" title="Permalink to this headline">¶</a></h2>
+<p>基本同fun, 但其所有子pair的第二个元素也是唯一的</p>
+<div class="section" id="id4">
+<h3><a class="toc-backref" href="#id25">10.5.1. fullfun?</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>判断一个S表达式是否为fullfun</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">fullfun?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">fun</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">set?</span> <span class="p">(</span><span class="nf">seconds</span> <span class="nv">fun</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">fullfun?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">fun</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">fun?</span> <span class="p">(</span><span class="nf">revrel</span> <span class="nv">fun</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">10. Friends and Relations</a><ul>
+<li><a class="reference internal" href="#set">10.1. set</a><ul>
+<li><a class="reference internal" href="#id1">10.1.1. set?</a></li>
+<li><a class="reference internal" href="#makeset">10.1.2. makeset</a></li>
+<li><a class="reference internal" href="#subset">10.1.3. subset?</a></li>
+<li><a class="reference internal" href="#eqset">10.1.4. eqset?</a></li>
+<li><a class="reference internal" href="#interset">10.1.5. interset?</a></li>
+<li><a class="reference internal" href="#id2">10.1.6. interset</a></li>
+<li><a class="reference internal" href="#union">10.1.7. union</a></li>
+<li><a class="reference internal" href="#intersectall">10.1.8. intersectall</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pair">10.2. pair</a><ul>
+<li><a class="reference internal" href="#a-pair">10.2.1. a-pair?</a></li>
+<li><a class="reference internal" href="#first">10.2.2. first</a></li>
+<li><a class="reference internal" href="#second">10.2.3. second</a></li>
+<li><a class="reference internal" href="#build">10.2.4. build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rel">10.3. rel</a></li>
+<li><a class="reference internal" href="#fun">10.4. fun</a><ul>
+<li><a class="reference internal" href="#id3">10.4.1. fun?</a></li>
+<li><a class="reference internal" href="#revrel">10.4.2. revrel</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fullfun">10.5. fullfun</a><ul>
+<li><a class="reference internal" href="#id4">10.5.1. fullfun?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_06.html"
+                        title="previous chapter">9. Shadows</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_08.html"
+                        title="next chapter">11. Lambda the Ultimate</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_07.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_08.html" title="11. Lambda the Ultimate"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_06.html" title="9. Shadows"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>4. Toys &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="5. Do It, Do It Again, and Again, and Again…" href="chapter_02.html" />
+    <link rel="prev" title="3. 序言" href="preface.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_02.html" title="5. Do It, Do It Again, and Again, and Again…"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="preface.html" title="3. 序言"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="toys">
+<h1><a class="toc-backref" href="#id4">4. Toys</a><a class="headerlink" href="#toys" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#toys" id="id4">Toys</a><ul>
+<li><a class="reference internal" href="#id1" id="id5">基本概念</a></li>
+<li><a class="reference internal" href="#id2" id="id6">常见函数</a></li>
+<li><a class="reference internal" href="#id3" id="id7">其它概念</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>使读者了解scheme语言的一些基本概念和一些常用函数，为接下来的章节打基础。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id5">4.1. 基本概念</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>S表达式: scheme中所以元素都可以叫做S表达式。</li>
+<li>atom: 原子，是指一个非列表的S表达式。</li>
+<li>list: 列表，用 <cite>(... ...)</cite> 包围起来的S表达式。</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2><a class="toc-backref" href="#id6">4.2. 常见函数</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">car: 返回非空列表中的首个S表达式，</p>
+<p>所以它操作的对象一定要是非空的列表(十戒第一条)。</p>
+</li>
+<li><p class="first">cdr: 取出非空列表中的除首个S表达式的列表，</p>
+<p>它操作的对象也是要非空列表(十戒第一条)。</p>
+</li>
+<li><p class="first">cons: 将两个S表达式连接成一个列表，第二个必须是一个列表。</p>
+</li>
+<li><p class="first">null?: 只判断列表是否为空(scheme五律第四条)。</p>
+</li>
+<li><p class="first">atom?: 用来判断一个S表达式是否为一个原子。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">atom?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">pair? </span><span class="nv">m</span><span class="p">))</span> <span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">null? </span><span class="nv">m</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">eq?: 用来判断两个非数字的的原子是否相等。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">guile的实现不太一样，它还可以比较数字。</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2><a class="toc-backref" href="#id7">4.3. 其它概念</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>define: 用来定义一个名称，或者一个函数。</li>
+<li>lambda: 用来定义一个函数。</li>
+<li>cond: 相当于其它语言中的switch。</li>
+<li>else: 永远返回#t, 即true。</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">4. Toys</a><ul>
+<li><a class="reference internal" href="#id1">4.1. 基本概念</a></li>
+<li><a class="reference internal" href="#id2">4.2. 常见函数</a></li>
+<li><a class="reference internal" href="#id3">4.3. 其它概念</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="preface.html"
+                        title="previous chapter">3. 序言</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_02.html"
+                        title="next chapter">5. Do It, Do It Again, and Again, and Again…</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_01.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_02.html" title="5. Do It, Do It Again, and Again, and Again…"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="preface.html" title="3. 序言"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

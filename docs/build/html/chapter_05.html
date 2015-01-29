@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>8. *Oh My Gawd*: It’s Full of Stars &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="9. Shadows" href="chapter_06.html" />
+    <link rel="prev" title="7. Numbers Games" href="chapter_04.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_06.html" title="9. Shadows"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_04.html" title="7. Numbers Games"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="oh-my-gawd-it-s-full-of-stars">
+<h1><a class="toc-backref" href="#id3">8. *Oh My Gawd*: It&#8217;s Full of Stars</a><a class="headerlink" href="#oh-my-gawd-it-s-full-of-stars" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#oh-my-gawd-it-s-full-of-stars" id="id3">*Oh My Gawd*: It&#8217;s Full of Stars</a><ul>
+<li><a class="reference internal" href="#rember" id="id4">rember*</a></li>
+<li><a class="reference internal" href="#insertr" id="id5">insertR*</a></li>
+<li><a class="reference internal" href="#occur" id="id6">occur*</a></li>
+<li><a class="reference internal" href="#subst" id="id7">subst*</a></li>
+<li><a class="reference internal" href="#insertl" id="id8">insertL*</a></li>
+<li><a class="reference internal" href="#member" id="id9">member*</a></li>
+<li><a class="reference internal" href="#leftmost" id="id10">leftmost</a></li>
+<li><a class="reference internal" href="#eqlist" id="id11">eqlist?</a></li>
+<li><a class="reference internal" href="#equal" id="id12">equal?</a></li>
+<li><a class="reference internal" href="#id1" id="id13">简化版eqlist?</a></li>
+<li><a class="reference internal" href="#id2" id="id14">rember</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>本章节稍微添加了一点难度。
+
+以前都只处理一层列表，现在需要处理嵌套列表（含有子列表的列表）。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="rember">
+<h2><a class="toc-backref" href="#id4">8.1. rember*</a><a class="headerlink" href="#rember" title="Permalink to this headline">¶</a></h2>
+<p>基本同rember, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rember*: symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rember*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">rember*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">rember*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">rember*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">rember*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">l</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rember*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">rember*&amp;co</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span> <span class="nv">col</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">rember*&amp;co</span> <span class="nv">a</span>
+                    <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">newl</span><span class="p">)))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">rember*&amp;co</span> <span class="nv">a</span>
+                  <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">carl</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">rember*&amp;co</span> <span class="nv">a</span>
+                                <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">cdrl</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">carl</span> <span class="nv">cdrl</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insertr">
+<h2><a class="toc-backref" href="#id5">8.2. insertR*</a><a class="headerlink" href="#insertr" title="Permalink to this headline">¶</a></h2>
+<p>基本同insertR, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; insertR*: symbol symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">insertR*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nf">insertR*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">insertR*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">insertR*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">insertR*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">l</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertR*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">insertR*&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span>
+                                  <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">newl</span><span class="p">))))))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">insertR*&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                                  <span class="nv">newl</span><span class="p">)))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">insertR*&amp;co</span> <span class="nv">new</span>
+                   <span class="nv">old</span>
+                   <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">carl</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">insertR*&amp;co</span> <span class="nv">new</span>
+                                  <span class="nv">old</span>
+                                  <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">cdrl</span><span class="p">)</span>
+                                    <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">carl</span> <span class="nv">cdrl</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="occur">
+<h2><a class="toc-backref" href="#id6">8.3. occur*</a><a class="headerlink" href="#occur" title="Permalink to this headline">¶</a></h2>
+<p>基本同occur, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; occur*: symbol list -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">occur*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">occur*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">occur*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">occur*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+              <span class="p">(</span><span class="nf">occur*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">occur*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">occur*&amp;co</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                               <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">num</span><span class="p">)))))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">occur*&amp;co</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span> <span class="nv">col</span><span class="p">))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">occur*&amp;co</span> <span class="nv">a</span>
+                 <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">carnum</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">occur*&amp;co</span> <span class="nv">a</span>
+                              <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                              <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">cdrnum</span><span class="p">)</span>
+                                <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">carnum</span> <span class="nv">cdrnum</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subst">
+<h2><a class="toc-backref" href="#id7">8.4. subst*</a><a class="headerlink" href="#subst" title="Permalink to this headline">¶</a></h2>
+<p>基本同subst, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; subst*: symbol symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subst*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nf">subst*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">subst*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">subst*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">subst*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">l</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">subst*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">l</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">subst*&amp;co</span> <span class="nv">new</span>
+                   <span class="nv">old</span>
+                   <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">newl</span><span class="p">)))))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">subst*&amp;co</span> <span class="nv">new</span>
+                   <span class="nv">old</span>
+                   <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">newl</span><span class="p">)))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">subst*&amp;co</span> <span class="nv">new</span>
+                 <span class="nv">old</span>
+                 <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">carl</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">subst*&amp;co</span> <span class="nv">new</span>
+                              <span class="nv">old</span>
+                              <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                              <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">cdrl</span><span class="p">)</span>
+                                <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">carl</span> <span class="nv">cdrl</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insertl">
+<h2><a class="toc-backref" href="#id8">8.5. insertL*</a><a class="headerlink" href="#insertl" title="Permalink to this headline">¶</a></h2>
+<p>基本同insertL, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; insertL*: symbol symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">insertL*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nf">insertL*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">insertL*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">insertL*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">insertL*</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">l</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertL*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">l</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">insertL*&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="nv">newl</span><span class="p">))))))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">insertL*&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="nv">newl</span><span class="p">)))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">insertL*&amp;co</span> <span class="nv">new</span>
+                   <span class="nv">old</span>
+                   <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">carl</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">insertL*&amp;co</span> <span class="nv">new</span>
+                                  <span class="nv">old</span>
+                                  <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">cdrl</span><span class="p">)</span>
+                                    <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">carl</span> <span class="nv">cdrl</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="member">
+<h2><a class="toc-backref" href="#id9">8.6. member*</a><a class="headerlink" href="#member" title="Permalink to this headline">¶</a></h2>
+<p>基本同member, 但其处理的对象包括一个嵌套的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; member*: symbol list -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">member*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">member*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="k">or </span><span class="p">(</span><span class="nf">member*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+               <span class="p">(</span><span class="nf">member*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">member*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">member*&amp;co</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span> <span class="nv">col</span><span class="p">))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">member*&amp;co</span> <span class="nv">a</span>
+                  <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">incar</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">member*&amp;co</span> <span class="nv">a</span>
+                                <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">incdr</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="k">or </span><span class="nv">incar</span> <span class="nv">incdr</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="leftmost">
+<h2><a class="toc-backref" href="#id10">8.7. leftmost</a><a class="headerlink" href="#leftmost" title="Permalink to this headline">¶</a></h2>
+<p>找出不包含空列表的列表/嵌套列表中的最左边的一个atom</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; leftmost: list -&gt; symbol</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">leftmost</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">leftmost</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">s</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">s</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">s</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">leftmost&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">leftmost</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="eqlist">
+<h2><a class="toc-backref" href="#id11">8.8. eqlist?</a><a class="headerlink" href="#eqlist" title="Permalink to this headline">¶</a></h2>
+<p>判断两个列表是否相等（包含嵌套列表）</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; eqlist?: list list -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">eqlist?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l1</span> <span class="nv">l2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">)))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">))</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">))</span> <span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">eqan?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l2</span><span class="p">))))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l2</span><span class="p">)))))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">eqlist?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l1</span> <span class="nv">l2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">eqan?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l2</span><span class="p">))))</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">))</span>
+          <span class="p">(</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">)))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span>
+                <span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l2</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="equal">
+<h2><a class="toc-backref" href="#id12">8.9. equal?</a><a class="headerlink" href="#equal" title="Permalink to this headline">¶</a></h2>
+<p>判断两个S表达式是否相等</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">equal?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">s1</span> <span class="nv">s2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nf">atom?</span> <span class="nv">s1</span><span class="p">)</span> <span class="p">(</span><span class="nf">atom?</span> <span class="nv">s2</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">eqan?</span> <span class="nv">s1</span> <span class="nv">s2</span><span class="p">))</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nf">atom?</span> <span class="nv">s1</span><span class="p">)</span> <span class="p">(</span><span class="nf">atom?</span> <span class="nv">s2</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">eqlist?</span> <span class="nv">s1</span> <span class="nv">s2</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id13">8.10. 简化版eqlist?</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>作者通过equal?来简化了eqlist?，</p>
+<p>而且equal?也是通过eqlist?来实现的。</p>
+<p>SO，只当函数正确的前提下再进行简化/优化。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">eqlist?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l1</span> <span class="nv">l2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">null? </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">l2</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nb">equal? </span><span class="p">(</span><span class="nb">car </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l2</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">eqlist?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l2</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2><a class="toc-backref" href="#id14">8.11. rember</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>重写之前的rember，使用equal?来简化之。</p>
+<p>参数s代表任何S表达式，参数l代码任何列表。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rember: symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rember</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">s</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">equal? </span><span class="nv">s</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">rember</span> <span class="nv">s</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">8. *Oh My Gawd*: It&#8217;s Full of Stars</a><ul>
+<li><a class="reference internal" href="#rember">8.1. rember*</a></li>
+<li><a class="reference internal" href="#insertr">8.2. insertR*</a></li>
+<li><a class="reference internal" href="#occur">8.3. occur*</a></li>
+<li><a class="reference internal" href="#subst">8.4. subst*</a></li>
+<li><a class="reference internal" href="#insertl">8.5. insertL*</a></li>
+<li><a class="reference internal" href="#member">8.6. member*</a></li>
+<li><a class="reference internal" href="#leftmost">8.7. leftmost</a></li>
+<li><a class="reference internal" href="#eqlist">8.8. eqlist?</a></li>
+<li><a class="reference internal" href="#equal">8.9. equal?</a></li>
+<li><a class="reference internal" href="#id1">8.10. 简化版eqlist?</a></li>
+<li><a class="reference internal" href="#id2">8.11. rember</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_04.html"
+                        title="previous chapter">7. Numbers Games</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_06.html"
+                        title="next chapter">9. Shadows</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_05.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_06.html" title="9. Shadows"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_04.html" title="7. Numbers Games"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

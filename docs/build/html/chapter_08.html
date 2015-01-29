@@ -1,0 +1,506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>11. Lambda the Ultimate &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="12. ... and Again, and Again, and Again ..." href="chapter_09.html" />
+    <link rel="prev" title="10. Friends and Relations" href="chapter_07.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_09.html" title="12. ... and Again, and Again, and Again ..."
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_07.html" title="10. Friends and Relations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lambda-the-ultimate">
+<h1><a class="toc-backref" href="#id1">11. Lambda the Ultimate</a><a class="headerlink" href="#lambda-the-ultimate" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#lambda-the-ultimate" id="id1">Lambda the Ultimate</a><ul>
+<li><a class="reference internal" href="#rember-f" id="id2">rember-f</a></li>
+<li><a class="reference internal" href="#eq-c" id="id3">eq?-c</a></li>
+<li><a class="reference internal" href="#insert-q" id="id4">insert-q</a></li>
+<li><a class="reference internal" href="#value" id="id5">value</a></li>
+<li><a class="reference internal" href="#multirember-f" id="id6">multirember-f</a></li>
+<li><a class="reference internal" href="#multirembert" id="id7">multiremberT</a></li>
+<li><a class="reference internal" href="#multirember-co" id="id8">multirember&amp;co</a></li>
+<li><a class="reference internal" href="#multiinsertlr" id="id9">multiinsertLR</a></li>
+<li><a class="reference internal" href="#multiinsertlr-co" id="id10">multiinsertLR&amp;co</a></li>
+<li><a class="reference internal" href="#evens-only" id="id11">evens-only*</a></li>
+<li><a class="reference internal" href="#evens-only-co" id="id12">evens-only*&amp;co</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>这一章才算开始高能, 下面的九,十章则更是要下一翻功夫了.
+
+说高能, 并不是指有多难(除了连续概念的讲解),
+
+而是指这一章揭示了很多更深入的东西, 更深入的抽象：
+
+**高阶函数** 与 **CPS变换** 。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="rember-f">
+<h2><a class="toc-backref" href="#id2">11.1. rember-f</a><a class="headerlink" href="#rember-f" title="Permalink to this headline">¶</a></h2>
+<p>基本同rember，但是其中的eq/equal比较函数当作参数传入进来。</p>
+<p>这样具体的比较操作就抽象比来，可以用来支持各种对象/类型的删除操作，只需要你定义好其对象/类型的eq/equal比较函数即可。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rember-f: function symbol list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rember-f</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">test?</span> <span class="nv">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">test?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">rember-f</span> <span class="p">(</span><span class="nf">test?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<p>简单修改一下，将之定义成为一个高阶函数，即返回函数的函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">rember-f</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">test?</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+       <span class="p">((</span><span class="nf">test?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">rember-f</span> <span class="p">(</span><span class="nf">test?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rember-eq?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">rember-f</span> <span class="nv">eq?</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rember-equal?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">rember-f</span> <span class="nv">equal?</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="eq-c">
+<h2><a class="toc-backref" href="#id3">11.2. eq?-c</a><a class="headerlink" href="#eq-c" title="Permalink to this headline">¶</a></h2>
+<p>返回一个函数, 用来与固定S表达式比较.</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">eq?-c</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">eq? </span><span class="nv">x</span> <span class="nv">a</span><span class="p">))))</span>
+
+<span class="c1">; 与salad比较</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">eq?-salad</span>
+<span class="p">(</span><span class="nf">eq?-c</span> <span class="ss">&#39;salad</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insert-q">
+<h2><a class="toc-backref" href="#id4">11.3. insert-q</a><a class="headerlink" href="#insert-q" title="Permalink to this headline">¶</a></h2>
+<p>返回一个函数, 具体的操作函数当作参数传入</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">其实在第3章，细心的话，会发现 <cite>insertL</cite> 、 <cite>insertR</cite> 、 <cite>subst</cite> 、 <cite>rember</cite> 的逻辑基本是一样的，只是各别的代码不一样，那么我们可以通过高阶函数来将公共的代码抽出来。</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">insert-g</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">seq</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+       <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">old</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">seq</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                   <span class="p">((</span><span class="nf">insert-g</span> <span class="nv">seq</span><span class="p">)</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">seqL</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="nv">l</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertL</span>
+  <span class="p">(</span><span class="nf">insert-g</span> <span class="nv">seqL</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">seqR</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">l</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertR</span>
+  <span class="p">(</span><span class="nf">insert-g</span> <span class="nv">seqR</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">seqS</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">l</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">subst</span>
+  <span class="p">(</span><span class="nf">insert-g</span> <span class="nv">seqS</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">seqrem</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="nv">l</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rember</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">l</span><span class="p">)</span>
+    <span class="p">((</span><span class="nf">insert-g</span> <span class="nv">seqrem</span><span class="p">)</span> <span class="no">#f</span> <span class="nv">a</span> <span class="nv">l</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="value">
+<h2><a class="toc-backref" href="#id5">11.4. value</a><a class="headerlink" href="#value" title="Permalink to this headline">¶</a></h2>
+<p>重写之前的value, 将里面的操作抽象出来</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">atom-to-function</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">x</span> <span class="ss">&#39;+</span><span class="p">)</span> <span class="nv">+</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">x</span> <span class="ss">&#39;*</span><span class="p">)</span> <span class="nv">*</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="nv">^</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">value</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">nexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">nexp</span><span class="p">)</span> <span class="nv">nexp</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">((</span><span class="nf">atom-to-function</span> <span class="p">(</span><span class="nf">operator</span> <span class="nv">nexp</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">1</span><span class="nv">st-sub-exp</span> <span class="nv">nexp</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">2</span><span class="nv">nd-sub-exp</span> <span class="nv">nexp</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multirember-f">
+<h2><a class="toc-backref" href="#id6">11.5. multirember-f</a><a class="headerlink" href="#multirember-f" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multirember-f</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">test?</span><span class="p">)</span>
+    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+       <span class="p">((</span><span class="nf">test?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+        <span class="p">((</span><span class="nf">multirember-f</span> <span class="nv">test?</span><span class="p">)</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+       <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                   <span class="p">((</span><span class="nf">multirember-f</span> <span class="nv">test?</span><span class="p">)</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multirember-eq?</span>
+  <span class="p">(</span><span class="nf">multirember-f</span> <span class="nv">eq?</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multirember-equal?</span>
+  <span class="p">(</span><span class="nf">multirember-f</span> <span class="nv">equal?</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">下面开始介绍到连续概念(continuation)</p>
+</div>
+</div>
+<div class="section" id="multirembert">
+<h2><a class="toc-backref" href="#id7">11.6. multiremberT</a><a class="headerlink" href="#multirembert" title="Permalink to this headline">¶</a></h2>
+<p>基本同上，不过test?可以带参数，将每次递归都不会变化的test?和a参数都存放到test?函数中，以后写函数，可以将哪些参数是不变的，哪些参数是变化的区分开来。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multiremberT</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">test?</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">test?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">multiremberT</span> <span class="nv">test?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">multiremberT</span> <span class="nv">test?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multirember-co">
+<h2><a class="toc-backref" href="#id8">11.7. multirember&amp;co</a><a class="headerlink" href="#multirember-co" title="Permalink to this headline">¶</a></h2>
+<p>添加一个连续函数col，multirember&amp;co函数的最后一步就是调用col。</p>
+<p>将具体的操作放入col中，其中的col相当于一个收集器(collector)，它将lat中和a参数不相同的S表达式放入col的第一个参数中，相同的放入第二个参数中。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multirember&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">multirember&amp;co</span> <span class="nv">a</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">seen</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="nv">newlat</span>
+                             <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">seen</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">multirember&amp;co</span> <span class="nv">a</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">seen</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">)</span>
+                             <span class="nv">seen</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">a-friend</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">null? </span><span class="nv">y</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>如果col为a-friend，那么multirember&amp;co的意思就是：</p>
+<div class="highlight-python"><div class="highlight"><pre>memeber?
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">last-friend</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">length </span><span class="nv">x</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>如果col为last-friend，那么multirember&amp;co的意思就是：</p>
+<div class="highlight-python"><div class="highlight"><pre>lat中有多少个与a不同的S表达式
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiinsertlr">
+<h2><a class="toc-backref" href="#id9">11.8. multiinsertLR</a><a class="headerlink" href="#multiinsertlr" title="Permalink to this headline">¶</a></h2>
+<p>将new插入到oldL的左边,oldR的右边.</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multiinsertLR</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">oldL</span> <span class="nv">oldR</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">oldL</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span>
+            <span class="p">(</span><span class="nb">cons </span><span class="nv">oldL</span>
+                  <span class="p">(</span><span class="nf">multiinsertLR</span> <span class="nv">new</span>
+                                 <span class="nv">oldL</span>
+                                 <span class="nv">oldR</span>
+                                 <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">oldR</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="nv">oldR</span>
+            <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span>
+                  <span class="p">(</span><span class="nf">multiinsertLR</span> <span class="nv">new</span>
+                                 <span class="nv">oldL</span>
+                                 <span class="nv">oldR</span>
+                                 <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">multiinsertLR</span> <span class="nv">new</span>
+                           <span class="nv">oldL</span>
+                           <span class="nv">oldR</span>
+                           <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiinsertlr-co">
+<h2><a class="toc-backref" href="#id10">11.9. multiinsertLR&amp;co</a><a class="headerlink" href="#multiinsertlr-co" title="Permalink to this headline">¶</a></h2>
+<p>col的newlat参数存放最后插入new参数后的newlat，L参数是在oldL参数左边插入的次数, R参数是在oldR参数右边插入的次数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">multiinsertLR&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">oldL</span> <span class="nv">oldR</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">oldL</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">multiinsertLR&amp;co</span> <span class="nv">new</span>
+                        <span class="nv">oldL</span>
+                        <span class="nv">oldR</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">L</span> <span class="nv">R</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">oldL</span> <span class="nv">newlat</span><span class="p">))</span>
+                               <span class="p">(</span><span class="nf">add1</span> <span class="nv">L</span><span class="p">)</span>
+                               <span class="nv">R</span><span class="p">))))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">oldR</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">multiinsertLR&amp;co</span> <span class="nv">new</span>
+                        <span class="nv">oldL</span>
+                        <span class="nv">oldR</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">L</span> <span class="nv">R</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">oldR</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">newlat</span><span class="p">))</span>
+                               <span class="nv">L</span>
+                               <span class="p">(</span><span class="nf">add1</span> <span class="nv">R</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">multiinsertLR&amp;co</span> <span class="nv">new</span>
+                        <span class="nv">oldL</span>
+                        <span class="nv">oldR</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">L</span> <span class="nv">R</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                               <span class="nv">L</span>
+                               <span class="nv">R</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="evens-only">
+<h2><a class="toc-backref" href="#id11">11.10. evens-only*</a><a class="headerlink" href="#evens-only" title="Permalink to this headline">¶</a></h2>
+<p>找出嵌套队列中所有的偶数</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; 此处要用之前定义的运算符号,用系统自带的会出错</span>
+<span class="c1">; lisp支持分数, 即3/2不缺失其精度</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">even?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">= </span><span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nb">/ </span><span class="nv">n</span> <span class="mi">2</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">n</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">evens-only*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+        <span class="p">((</span><span class="nb">even? </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+         <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">evens-only*</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">))))</span>
+        <span class="p">(</span><span class="nf">else</span>
+         <span class="p">(</span><span class="nf">evens-only*</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">evens-only*</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+            <span class="p">(</span><span class="nf">evens-only*</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="evens-only-co">
+<h2><a class="toc-backref" href="#id12">11.11. evens-only*&amp;co</a><a class="headerlink" href="#evens-only-co" title="Permalink to this headline">¶</a></h2>
+<p>col函数的第一个参数表示l列表中所有的偶数列表，第二个参数表示所有偶数之积，第三个参数表示l列表中所有非偶数之和。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">evens-only*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">cond</span>
+       <span class="p">((</span><span class="nb">even? </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">evens-only*&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                          <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">m</span> <span class="nv">s</span><span class="p">)</span>
+                            <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">)</span>
+                                 <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">m</span><span class="p">)</span>
+                                 <span class="nv">s</span><span class="p">))))</span>
+       <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">evens-only*&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span> <span class="nv">m</span> <span class="nv">s</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="nv">newlat</span>
+                               <span class="nv">m</span>
+                               <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">s</span><span class="p">)))))))</span>
+      <span class="p">(</span><span class="nf">else</span>
+       <span class="p">(</span><span class="nf">evens-only*&amp;co</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span>
+                       <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">al</span> <span class="nv">am</span> <span class="nv">as</span><span class="p">)</span>
+                         <span class="p">(</span><span class="nf">evens-only*&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                         <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">dl</span> <span class="nv">dm</span> <span class="nv">ds</span><span class="p">)</span>
+                                           <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">al</span> <span class="nv">dl</span><span class="p">)</span>
+                                                <span class="p">(</span><span class="nb">* </span><span class="nv">am</span> <span class="nv">dm</span><span class="p">)</span>
+                                                <span class="p">(</span><span class="nb">+ </span><span class="nv">as</span> <span class="nv">ds</span><span class="p">))))))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">the-last-friend</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newl</span> <span class="nv">product</span> <span class="nv">sum</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="nv">sum</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">product</span> <span class="nv">newl</span><span class="p">))))</span>
+</pre></div>
+</div>
+<p>如果col为the-last-friend，那么evens-only*&amp;co意思为：</p>
+<div class="highlight-python"><div class="highlight"><pre>返回一个列表，列表的第一个S表达式为l参数中所有的偶数之积，
+
+列表的第二个S表达式为l参数中所有偶数之和，
+
+列表的剩余S表达式为l参数中所有的偶数。
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>这里建议一下，最好将从第二章开始的所有递归函数都用cps形式手动重写一遍。</p>
+<p class="last">第一次接触连续的概念不用担心，虽然看起来很难，其实只是你不熟悉而已，按照上面的建议做一遍，就都明白了。</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">11. Lambda the Ultimate</a><ul>
+<li><a class="reference internal" href="#rember-f">11.1. rember-f</a></li>
+<li><a class="reference internal" href="#eq-c">11.2. eq?-c</a></li>
+<li><a class="reference internal" href="#insert-q">11.3. insert-q</a></li>
+<li><a class="reference internal" href="#value">11.4. value</a></li>
+<li><a class="reference internal" href="#multirember-f">11.5. multirember-f</a></li>
+<li><a class="reference internal" href="#multirembert">11.6. multiremberT</a></li>
+<li><a class="reference internal" href="#multirember-co">11.7. multirember&amp;co</a></li>
+<li><a class="reference internal" href="#multiinsertlr">11.8. multiinsertLR</a></li>
+<li><a class="reference internal" href="#multiinsertlr-co">11.9. multiinsertLR&amp;co</a></li>
+<li><a class="reference internal" href="#evens-only">11.10. evens-only*</a></li>
+<li><a class="reference internal" href="#evens-only-co">11.11. evens-only*&amp;co</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_07.html"
+                        title="previous chapter">10. Friends and Relations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_09.html"
+                        title="next chapter">12. ... and Again, and Again, and Again ...</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_08.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_09.html" title="12. ... and Again, and Again, and Again ..."
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_07.html" title="10. Friends and Relations"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

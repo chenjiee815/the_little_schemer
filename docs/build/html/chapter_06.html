@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>9. Shadows &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="10. Friends and Relations" href="chapter_07.html" />
+    <link rel="prev" title="8. *Oh My Gawd*: It’s Full of Stars" href="chapter_05.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_07.html" title="10. Friends and Relations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_05.html" title="8. *Oh My Gawd*: It’s Full of Stars"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="shadows">
+<h1><a class="toc-backref" href="#id1">9. Shadows</a><a class="headerlink" href="#shadows" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#shadows" id="id1">Shadows</a><ul>
+<li><a class="reference internal" href="#numbered" id="id2">numbered?</a></li>
+<li><a class="reference internal" href="#value" id="id3">value</a></li>
+<li><a class="reference internal" href="#church-encoding" id="id4">church encoding</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>本章节主要两个方面：
+
+1. 一个计算器的实现（计算算术表达式的值），
+
+   为最后一章节讲解Scheme解释器打基础。
+
+2. church encoding，使用列表来表示数字，
+
+   然后再参照第四章，根据原语函数定义加、减等函数。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="numbered">
+<h2><a class="toc-backref" href="#id2">9.1. numbered?</a><a class="headerlink" href="#numbered" title="Permalink to this headline">¶</a></h2>
+<p>判断一个S表达式是否为算术表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; numbered?: symbol -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">numbered?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">aexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">aexp</span><span class="p">)</span> <span class="p">(</span><span class="nb">number? </span><span class="nv">aexp</span><span class="p">))</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">))</span> <span class="ss">&#39;+</span><span class="p">)</span>
+          <span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">))</span> <span class="ss">&#39;*</span><span class="p">)</span>
+          <span class="p">(</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">))</span> <span class="ss">&#39;^</span><span class="p">))</span>
+      <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">numberd?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">aexp</span><span class="p">))</span>
+           <span class="p">(</span><span class="nf">numberd?</span> <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="value">
+<h2><a class="toc-backref" href="#id3">9.2. value</a><a class="headerlink" href="#value" title="Permalink to this headline">¶</a></h2>
+<p>获取一个算术表达式的值</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">; 在Guile环境，请添加如下代码
+(define ^ expt)</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">value</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">nexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">nexp</span><span class="p">)</span> <span class="nv">nexp</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">nexp</span><span class="p">)</span> <span class="ss">&#39;+</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">)))))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nb">car </span><span class="nv">nexp</span><span class="p">)</span> <span class="ss">&#39;*</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">^</span> <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">))</span>
+              <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">nexp</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; 帮助函数</span>
+<span class="p">(</span><span class="k">define </span><span class="mi">1</span><span class="nv">st-sub-exp</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">aexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">))))</span>
+
+<span class="c1">; 帮助函数</span>
+<span class="p">(</span><span class="k">define </span><span class="mi">2</span><span class="nv">nd-sub-exp</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">aexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">cdr </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">aexp</span><span class="p">)))))</span>
+
+<span class="c1">; 帮助函数</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">operator</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">aexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">car </span><span class="nv">aexp</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">value</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">nexp</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">atom?</span> <span class="nv">nexp</span><span class="p">)</span> <span class="nv">nexp</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nf">operator</span> <span class="nv">nexp</span><span class="p">)</span> <span class="ss">&#39;+</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">1</span><span class="nv">st-sub-exp</span> <span class="nv">nexp</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">2</span><span class="nv">nd-sub-exp</span> <span class="nv">nexp</span><span class="p">))))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="p">(</span><span class="nf">operator</span> <span class="nv">nexp</span><span class="p">)</span> <span class="ss">&#39;*</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">1</span><span class="nv">st-sub-exp</span> <span class="nv">nexp</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">2</span><span class="nv">nd-sub-exp</span><span class="p">))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">^</span> <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">1</span><span class="nv">st-sub-exp</span> <span class="nv">nexp</span><span class="p">))</span>
+              <span class="p">(</span><span class="nf">value</span> <span class="p">(</span><span class="mi">2</span><span class="nv">nd-sub-exp</span> <span class="nv">nexp</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<p>使用帮助函数重写的value函数，其实该版本的value函数可以用在前缀、中缀、后缀表达式上，只要修改三个帮助函数即可。</p>
+</div>
+<div class="section" id="church-encoding">
+<h2><a class="toc-backref" href="#id4">9.3. church encoding</a><a class="headerlink" href="#church-encoding" title="Permalink to this headline">¶</a></h2>
+<p>翻译为：邱奇数，关于它的定义详见 <a class="reference external" href="http://zh.wikipedia.org/wiki/%E9%82%B1%E5%A5%87%E6%95%B0">Wiki 邱奇数</a></p>
+<p>作者用 <cite>()</cite> 来表示0, <cite>(())</cite> 表示1, <cite>(() ())</cite> 表示2... ...</p>
+<p>然后定义了对应的原语函数: sero?，edd1，zub1。</p>
+<ol class="arabic">
+<li><p class="first">sero?: 对应zero?</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">sero?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">null? </span><span class="nv">n</span><span class="p">)))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">edd1: 对应add1</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">edd1</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cons </span><span class="o">&#39;</span><span class="p">()</span> <span class="nv">n</span><span class="p">)))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">zub1: 对应sub1</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">zub1</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">cdr </span><span class="nv">n</span><span class="p">)))</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>和第四章一样，根据上面三个原语函数，然后再来定义加、减等这些函数。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">+</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">sero?</span> <span class="nv">m</span><span class="p">)</span> <span class="nv">n</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">edd1</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">n</span> <span class="p">(</span><span class="nf">zub1</span> <span class="nv">m</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">-</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nf">sero?</span> <span class="nv">m</span><span class="p">)</span> <span class="nv">n</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">- </span><span class="p">(</span><span class="nf">zub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">zub1</span> <span class="nv">m</span><span class="p">))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">9. Shadows</a><ul>
+<li><a class="reference internal" href="#numbered">9.1. numbered?</a></li>
+<li><a class="reference internal" href="#value">9.2. value</a></li>
+<li><a class="reference internal" href="#church-encoding">9.3. church encoding</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_05.html"
+                        title="previous chapter">8. *Oh My Gawd*: It&#8217;s Full of Stars</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_07.html"
+                        title="next chapter">10. Friends and Relations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_06.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_07.html" title="10. Friends and Relations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_05.html" title="8. *Oh My Gawd*: It’s Full of Stars"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

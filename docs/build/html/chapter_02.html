@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. Do It, Do It Again, and Again, and Again… &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="6. Cons the Magnificent" href="chapter_03.html" />
+    <link rel="prev" title="4. Toys" href="chapter_01.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_03.html" title="6. Cons the Magnificent"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_01.html" title="4. Toys"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="do-it-do-it-again-and-again-and-again">
+<h1><a class="toc-backref" href="#id2">5. Do It, Do It Again, and Again, and Again…</a><a class="headerlink" href="#do-it-do-it-again-and-again-and-again" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#do-it-do-it-again-and-again-and-again" id="id2">Do It, Do It Again, and Again, and Again…</a><ul>
+<li><a class="reference internal" href="#id1" id="id3">基本概念</a></li>
+<li><a class="reference internal" href="#lat" id="id4">lat?</a></li>
+<li><a class="reference internal" href="#member" id="id5">member?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章节概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>首先介绍了一个基本概念 `lat` ，然后定义了一系列与该概念相关的操作，以及如何通过递归来实现这些操作。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id3">5.1. 基本概念</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>lat</p>
+<blockquote>
+<div>不包含子列表的列表</div></blockquote>
+</div>
+<div class="section" id="lat">
+<h2><a class="toc-backref" href="#id4">5.2. lat?</a><a class="headerlink" href="#lat" title="Permalink to this headline">¶</a></h2>
+<p>判断某个列表是否为 <cite>lat</cite></p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">通过判断列表中是否每个S表达式都是原子来实现</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; lat?: list -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">lat?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+      <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nf">lat?</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="no">#f</span><span class="p">))))</span>
+</pre></div>
+</div>
+<p><cite>lat?</cite> 经过CPS变换后的代码</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>建议阅读完第8章，了解CPS变换之后，再回头从2章将每个函数写一个对应的CPS变换。</p>
+<p class="last">用于连续的那个函数基本没有固定的参数和代码，按照自己所想的来。</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">;; 添加一个连续函数，参数中为两个列表</span>
+<span class="c1">;; 第一个表示lat列表，第二表示非lat列表</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">nolat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">null? </span><span class="nv">nolat</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">lat?&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="nf">atom?</span> <span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nf">lat?&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                                <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">nolat</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">lat</span><span class="p">)</span> <span class="nv">nolat</span><span class="p">))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">lat?&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">nolat</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="nv">lat</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">)</span> <span class="nv">nolat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="member">
+<h2><a class="toc-backref" href="#id5">5.3. member?</a><a class="headerlink" href="#member" title="Permalink to this headline">¶</a></h2>
+<p>用来判断一个S表达式是否在一个lat之内。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; member?: symbol lat -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">member?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">member?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; CPS变换</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">in</span> <span class="nv">out</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">null? </span><span class="nv">in</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">member?&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">member?&amp;co</span> <span class="nv">a</span>
+                                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">in</span> <span class="nv">out</span><span class="p">)</span>
+                                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">a</span> <span class="nv">in</span><span class="p">)</span> <span class="nv">out</span><span class="p">))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">member?&amp;co</span> <span class="nv">a</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">in</span> <span class="nv">out</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="nv">in</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">a</span> <span class="nv">out</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. Do It, Do It Again, and Again, and Again…</a><ul>
+<li><a class="reference internal" href="#id1">5.1. 基本概念</a></li>
+<li><a class="reference internal" href="#lat">5.2. lat?</a></li>
+<li><a class="reference internal" href="#member">5.3. member?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_01.html"
+                        title="previous chapter">4. Toys</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_03.html"
+                        title="next chapter">6. Cons the Magnificent</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_02.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_03.html" title="6. Cons the Magnificent"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_01.html" title="4. Toys"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

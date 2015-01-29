@@ -1,0 +1,801 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>7. Numbers Games &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="8. *Oh My Gawd*: It’s Full of Stars" href="chapter_05.html" />
+    <link rel="prev" title="6. Cons the Magnificent" href="chapter_03.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_05.html" title="8. *Oh My Gawd*: It’s Full of Stars"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_03.html" title="6. Cons the Magnificent"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="numbers-games">
+<h1><a class="toc-backref" href="#id10">7. Numbers Games</a><a class="headerlink" href="#numbers-games" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#numbers-games" id="id10">Numbers Games</a><ul>
+<li><a class="reference internal" href="#id1" id="id11">基本概念</a></li>
+<li><a class="reference internal" href="#id2" id="id12">+</a></li>
+<li><a class="reference internal" href="#id3" id="id13">-</a></li>
+<li><a class="reference internal" href="#addtup" id="id14">addtup</a></li>
+<li><a class="reference internal" href="#id4" id="id15">*</a></li>
+<li><a class="reference internal" href="#tup" id="id16">tup+</a></li>
+<li><a class="reference internal" href="#id5" id="id17">&lt;</a></li>
+<li><a class="reference internal" href="#id6" id="id18">&gt;</a></li>
+<li><a class="reference internal" href="#id7" id="id19">=</a></li>
+<li><a class="reference internal" href="#id8" id="id20">^</a></li>
+<li><a class="reference internal" href="#id9" id="id21">/</a></li>
+<li><a class="reference internal" href="#length" id="id22">length</a></li>
+<li><a class="reference internal" href="#pick" id="id23">pick</a></li>
+<li><a class="reference internal" href="#rempick" id="id24">rempick</a></li>
+<li><a class="reference internal" href="#no-nums" id="id25">no-nums</a></li>
+<li><a class="reference internal" href="#all-nums" id="id26">all-nums</a></li>
+<li><a class="reference internal" href="#eqan" id="id27">eqan?</a></li>
+<li><a class="reference internal" href="#occur" id="id28">occur?</a></li>
+<li><a class="reference internal" href="#one" id="id29">one?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章节概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>主要引入了数字，以及数字列表tup，
+
+围绕着上面两个概念，定义了相关的一系列操作，并用递归实现之。
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="id1">
+<h2><a class="toc-backref" href="#id11">7.1. 基本概念</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">数字也是一个atom</p>
+</li>
+<li><p class="first">number?: 判断一个S表达式是否为数字</p>
+</li>
+<li><p class="first">add1: 对数字加1</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">add1</span> <span class="mi">1</span><span class="nv">+</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">sub1: 对数字减1</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">sub1</span> <span class="mi">1</span><span class="nv">-</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">zero?: 判断一个数字是否为0</p>
+</li>
+<li><p class="first">tup: 列表中包含的每个s表达式都是数字的列表。</p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">书中为了简化概念，不考虑负数的情况。</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2><a class="toc-backref" href="#id12">7.2. +</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>将两个数字相加</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; +; number number -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">+</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">a</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)))))))</span>
+
+<span class="c1">; 另外一个版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">+</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">add1</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">+&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">a</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">+&amp;co</span> <span class="nv">a</span>
+                 <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">num</span><span class="p">))))))))</span>
+
+<span class="c1">; 另外一个版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">+&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">a</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">+&amp;co</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">a</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)</span>
+                     <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2><a class="toc-backref" href="#id13">7.3. -</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>将两个数字相减</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">不考虑相减的结果为负数的情况</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; -: number number -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">-</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">sub1</span> <span class="p">(</span><span class="nb">- </span><span class="nv">a</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)))))))</span>
+
+<span class="c1">; 另一个版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">-</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">- </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">-&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">a</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">-&amp;co</span> <span class="nv">a</span>
+                 <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">num</span><span class="p">))))))))</span>
+
+<span class="c1">; 另一个版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">-&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">a</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">-&amp;co</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">b</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="addtup">
+<h2><a class="toc-backref" href="#id14">7.4. addtup</a><a class="headerlink" href="#addtup" title="Permalink to this headline">¶</a></h2>
+<p>将一个tup中的所有数字相加</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; addtup: tup -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">addtup</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">tup</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">car </span><span class="nv">tup</span><span class="p">)</span> <span class="p">(</span><span class="nf">addtup</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">addtup&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">tup</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">addtup&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">sum</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">sum</span> <span class="p">(</span><span class="nb">car </span><span class="nv">tup</span><span class="p">)))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2><a class="toc-backref" href="#id15">7.5. *</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>将两个数字相乘</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; *: number number -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">*</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">+ </span><span class="nv">n</span> <span class="p">(</span><span class="nb">* </span><span class="nv">n</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">*&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">*&amp;co</span> <span class="nv">n</span>
+                 <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">num</span> <span class="nv">n</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tup">
+<h2><a class="toc-backref" href="#id16">7.6. tup+</a><a class="headerlink" href="#tup" title="Permalink to this headline">¶</a></h2>
+<p>将两个tup中相对的数字相加,然后返回相加后的tup</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; tup1+: tup tup -&gt; tup</span>
+<span class="c1">; 该函数允许两个参数的长度不一样</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">tup1+</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">tup1</span> <span class="nv">tup2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup2</span><span class="p">)</span> <span class="nv">tup1</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup1</span><span class="p">)</span> <span class="nv">tup2</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">car </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">tup2</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">tup+</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup2</span><span class="p">)))))))</span>
+
+<span class="c1">; tup2+: tup tup -&gt; tup</span>
+<span class="c1">; 该函数的两个参数长度必须一样</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">tup2+</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">tup1</span> <span class="nv">tup2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">null? </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nb">null? </span><span class="nv">tup2</span><span class="p">))</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">car </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">tup2</span><span class="p">))</span>
+                 <span class="p">(</span><span class="nf">tup+</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup2</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newtup</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newtup</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newtup</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">tup+&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">tup1</span> <span class="nv">tup2</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup1</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">tup2</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">tup2</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="nv">tup1</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">tup+&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup1</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nb">cdr </span><span class="nv">tup2</span><span class="p">)</span>
+                    <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newtup</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nb">car </span><span class="nv">tup1</span><span class="p">)</span>
+                                    <span class="p">(</span><span class="nb">car </span><span class="nv">tup2</span><span class="p">))</span>
+                                 <span class="nv">newtup</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2><a class="toc-backref" href="#id17">7.7. &lt;</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>比较两个数字的大小</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">&lt; 函数未考虑两个数字都为0的情况</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; &gt;: number number -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">&gt;</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">&gt; </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">&gt;&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">&gt;&amp;co</span> <span class="p">(</span><span class="nb">- </span><span class="nv">n</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nb">- </span><span class="nv">m</span> <span class="mi">1</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2><a class="toc-backref" href="#id18">7.8. &gt;</a><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>比较两个数字的大小</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">&lt; 函数未考虑两个数字都为0的情况</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; &lt;: number number -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">&lt;</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">&lt; </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">&lt;&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#t</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">&lt;&amp;co</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h2><a class="toc-backref" href="#id19">7.9. =</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>比较两个数字是否相等</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; =: number number -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">=</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">= </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">))))))</span>
+
+<span class="c1">; 另一版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">=</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">&gt; </span><span class="nv">n</span> <span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nb">&lt; </span><span class="nv">n</span> <span class="nv">m</span><span class="p">))</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="no">#t</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">bflag</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">bflag</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">=&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="no">#f</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">=&amp;co</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h2><a class="toc-backref" href="#id20">7.10. ^</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>阶乘</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; ^: number number -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">^</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">* </span><span class="nv">n</span> <span class="p">(</span><span class="nf">^</span> <span class="nv">n</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">^&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">1</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">^&amp;co</span> <span class="nv">n</span>
+                 <span class="p">(</span><span class="nf">sub1</span> <span class="nv">m</span><span class="p">)</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">* </span><span class="nv">n</span> <span class="nv">num</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id9">
+<h2><a class="toc-backref" href="#id21">7.11. /</a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>除</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; /: number number -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">/</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">&lt; </span><span class="nv">n</span> <span class="nv">m</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">- </span><span class="nv">n</span> <span class="nv">m</span><span class="p">)</span> <span class="nv">m</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">/&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">m</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">&lt; </span><span class="nv">n</span> <span class="nv">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">/&amp;co</span> <span class="p">(</span><span class="nb">- </span><span class="nv">n</span> <span class="nv">m</span><span class="p">)</span>
+                 <span class="nv">m</span>
+                 <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">num</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="length">
+<h2><a class="toc-backref" href="#id22">7.12. length</a><a class="headerlink" href="#length" title="Permalink to this headline">¶</a></h2>
+<p>返回一个lat的长度</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; length: lat -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">length</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nb">length </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">length&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">length&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">num</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pick">
+<h2><a class="toc-backref" href="#id23">7.13. pick</a><a class="headerlink" href="#pick" title="Permalink to this headline">¶</a></h2>
+<p>根据传入的数字,获取其对应在lat中位置的S表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; pick: number lat -&gt; symbol</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">pick</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">pick</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">pick&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">pick&amp;co</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rempick">
+<h2><a class="toc-backref" href="#id24">7.14. rempick</a><a class="headerlink" href="#rempick" title="Permalink to this headline">¶</a></h2>
+<p>根据传入的数字, 删除其对应在lat中位置的S表达式,并返回剩余列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rempick: number lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rempick</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">rempick</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">lat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rempick&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">rempick&amp;co</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                       <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                         <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                                    <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="no-nums">
+<h2><a class="toc-backref" href="#id25">7.15. no-nums</a><a class="headerlink" href="#no-nums" title="Permalink to this headline">¶</a></h2>
+<p>选出列表中的非数字S表达式, 并以列表形式返回</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; no-nums: lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">no-nums</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">number? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">no-nums</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">no-nums</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">no-nums&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">number? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">no-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">col</span><span class="p">))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">no-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="all-nums">
+<h2><a class="toc-backref" href="#id26">7.16. all-nums</a><a class="headerlink" href="#all-nums" title="Permalink to this headline">¶</a></h2>
+<p>跟上面相反, 只返回数字列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; all-nums: lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">all-nums</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">not </span><span class="p">(</span><span class="nb">number? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)))</span> <span class="p">(</span><span class="nf">all-nums</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">all-nums</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">all-nums&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">not </span><span class="p">(</span><span class="nb">number? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="nf">all-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">col</span><span class="p">))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">all-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p><cite>no-nums</cite> 和 <cite>all-nums</cite> 的逻辑基本一样，</p>
+<p>其实可以将它们的共同点抽出来。</p>
+<div class="last highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">no-nums</span> <span class="nv">all-nums</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">dispaly</span> <span class="nv">no-nums</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">all-nums</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">split-nums&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">number? </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">split-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">no</span> <span class="nv">all</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="nv">no</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">all</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">split-nums&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">no</span> <span class="nv">all</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">no</span><span class="p">)</span> <span class="nv">all</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="eqan">
+<h2><a class="toc-backref" href="#id27">7.17. eqan?</a><a class="headerlink" href="#eqan" title="Permalink to this headline">¶</a></h2>
+<p>比较两个S表达式是否是相等</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">实现该函数是为了扩展 <cite>eq?</cite> 的功能，后面会用到该函数</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; eqan? symbol symbol -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">eqan?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a1</span> <span class="nv">a2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="k">and </span><span class="p">(</span><span class="nb">number? </span><span class="nv">a1</span><span class="p">)</span> <span class="p">(</span><span class="nb">number? </span><span class="nv">a2</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">= </span><span class="nv">a1</span> <span class="nv">a2</span><span class="p">))</span>
+     <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">number? </span><span class="nv">a1</span><span class="p">)</span> <span class="p">(</span><span class="nb">number? </span><span class="nv">a2</span><span class="p">))</span>
+      <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">eq? </span><span class="nv">a1</span> <span class="nv">a2</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="occur">
+<h2><a class="toc-backref" href="#id28">7.18. occur?</a><a class="headerlink" href="#occur" title="Permalink to this headline">¶</a></h2>
+<p>检查列表中有几个指定的S表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; occur: symbol lat -&gt; number</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">occur</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+     <span class="p">((</span><span class="nf">eqan?</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">add1</span> <span class="p">(</span><span class="nf">occur</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">occur</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">num</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">num</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">occur&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span><span class="p">))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">n</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">occur&amp;co</span> <span class="nv">n</span>
+                <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">num</span><span class="p">)</span>
+                  <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nf">add1</span> <span class="nv">num</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">occur&amp;co</span> <span class="nv">n</span>
+                <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                <span class="nv">col</span><span class="p">)))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="one">
+<h2><a class="toc-backref" href="#id29">7.19. one?</a><a class="headerlink" href="#one" title="Permalink to this headline">¶</a></h2>
+<p>判断一个数字是否为1</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">写这个函数，应该是稍微提一下Scheme中的第八戒。</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; one?: number -&gt; bool</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">one?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">zero? </span><span class="nv">n</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">zero? </span><span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))))))</span>
+
+<span class="c1">; 另一版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">one?</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">= </span><span class="nv">n</span> <span class="mi">1</span><span class="p">)))))</span>
+</pre></div>
+</div>
+<p>通过 <cite>one?</cite> 咱们就可以简写 <cite>rempick</cite> 函数了。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rempick: number lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rempick</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">n</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nf">one?</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">rempick</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">7. Numbers Games</a><ul>
+<li><a class="reference internal" href="#id1">7.1. 基本概念</a></li>
+<li><a class="reference internal" href="#id2">7.2. +</a></li>
+<li><a class="reference internal" href="#id3">7.3. -</a></li>
+<li><a class="reference internal" href="#addtup">7.4. addtup</a></li>
+<li><a class="reference internal" href="#id4">7.5. *</a></li>
+<li><a class="reference internal" href="#tup">7.6. tup+</a></li>
+<li><a class="reference internal" href="#id5">7.7. &lt;</a></li>
+<li><a class="reference internal" href="#id6">7.8. &gt;</a></li>
+<li><a class="reference internal" href="#id7">7.9. =</a></li>
+<li><a class="reference internal" href="#id8">7.10. ^</a></li>
+<li><a class="reference internal" href="#id9">7.11. /</a></li>
+<li><a class="reference internal" href="#length">7.12. length</a></li>
+<li><a class="reference internal" href="#pick">7.13. pick</a></li>
+<li><a class="reference internal" href="#rempick">7.14. rempick</a></li>
+<li><a class="reference internal" href="#no-nums">7.15. no-nums</a></li>
+<li><a class="reference internal" href="#all-nums">7.16. all-nums</a></li>
+<li><a class="reference internal" href="#eqan">7.17. eqan?</a></li>
+<li><a class="reference internal" href="#occur">7.18. occur?</a></li>
+<li><a class="reference internal" href="#one">7.19. one?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_03.html"
+                        title="previous chapter">6. Cons the Magnificent</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_05.html"
+                        title="next chapter">8. *Oh My Gawd*: It&#8217;s Full of Stars</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_04.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_05.html" title="8. *Oh My Gawd*: It’s Full of Stars"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_03.html" title="6. Cons the Magnificent"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>6. Cons the Magnificent &mdash; 《The Little Schemer》笔记 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="《The Little Schemer》笔记 1.0 documentation" href="index.html" />
+    <link rel="next" title="7. Numbers Games" href="chapter_04.html" />
+    <link rel="prev" title="5. Do It, Do It Again, and Again, and Again…" href="chapter_02.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chapter_04.html" title="7. Numbers Games"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chapter_02.html" title="5. Do It, Do It Again, and Again, and Again…"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cons-the-magnificent">
+<h1><a class="toc-backref" href="#id1">6. Cons the Magnificent</a><a class="headerlink" href="#cons-the-magnificent" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#cons-the-magnificent" id="id1">Cons the Magnificent</a><ul>
+<li><a class="reference internal" href="#rember" id="id2">rember</a></li>
+<li><a class="reference internal" href="#firsts" id="id3">firsts</a></li>
+<li><a class="reference internal" href="#insertr" id="id4">insertR</a></li>
+<li><a class="reference internal" href="#insertl" id="id5">insertL</a></li>
+<li><a class="reference internal" href="#subst" id="id6">subst</a></li>
+<li><a class="reference internal" href="#subst2" id="id7">subst2</a></li>
+<li><a class="reference internal" href="#multirember" id="id8">multirember</a></li>
+<li><a class="reference internal" href="#multiinsertr" id="id9">multiinsertR</a></li>
+<li><a class="reference internal" href="#multiinsertl" id="id10">multiinsertL</a></li>
+<li><a class="reference internal" href="#multisubst" id="id11">multisubst</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>本章节概要：</p>
+<div class="highlight-python"><div class="highlight"><pre>继续讲解lat/列表相关的操作及使用递归来进行代码实现
+</pre></div>
+</div>
+<hr class="docutils" />
+<div class="section" id="rember">
+<h2><a class="toc-backref" href="#id2">6.1. rember</a><a class="headerlink" href="#rember" title="Permalink to this headline">¶</a></h2>
+<p>将lat中首次出现的某个S表达式删除。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; rember: symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">rember</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">rember</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; 参数rmcount不是必需的，也可以去掉</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rmcount</span> <span class="nv">leftlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">rmcount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">leftlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">leftlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">rember&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">1</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">rember&amp;co</span> <span class="nv">a</span>
+                       <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                       <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rmcount</span> <span class="nv">leftlat</span><span class="p">)</span>
+                         <span class="p">(</span><span class="nf">col</span> <span class="nv">rmcount</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">leftlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="firsts">
+<h2><a class="toc-backref" href="#id3">6.2. firsts</a><a class="headerlink" href="#firsts" title="Permalink to this headline">¶</a></h2>
+<p>从一个列表中的获取其每个子列表的首个S表达式，并以列表形式返回</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">此函数并未考虑每个子列表为空表的情况</p>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; firsts: list -&gt; list</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">firsts</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="p">(</span><span class="nf">firsts</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">first_ed</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">first_ed</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">first_ed</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">firsts&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">l</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+    <span class="p">((</span><span class="nb">null? </span><span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+    <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">firsts&amp;co</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">l</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">first_ed</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="p">(</span><span class="nb">car </span><span class="nv">l</span><span class="p">))</span> <span class="nv">first_ed</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insertr">
+<h2><a class="toc-backref" href="#id4">6.3. insertR</a><a class="headerlink" href="#insertr" title="Permalink to this headline">¶</a></h2>
+<p>将一个S表达式插入到一个列表中指定S表达式的右边，并返回修改后的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; insertR: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">insertR</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">insertR</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertR&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">insertR&amp;co</span> <span class="nv">new</span>
+                        <span class="nv">old</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insertl">
+<h2><a class="toc-backref" href="#id5">6.4. insertL</a><a class="headerlink" href="#insertl" title="Permalink to this headline">¶</a></h2>
+<p>将一个S表达式插入到一个列表中指定S表达式的左边，并返回修改后的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; insertL: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">insertL</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">insertL</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">insertL&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">insertL&amp;co</span> <span class="nv">new</span>
+                        <span class="nv">old</span>
+                        <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subst">
+<h2><a class="toc-backref" href="#id6">6.5. subst</a><a class="headerlink" href="#subst" title="Permalink to this headline">¶</a></h2>
+<p>用新的S表达式替代列表中指定的S表达式，并返回修改后的列表</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; subst: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subst</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">subst</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">subst&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">subst&amp;co</span> <span class="nv">new</span>
+                      <span class="nv">old</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subst2">
+<h2><a class="toc-backref" href="#id7">6.6. subst2</a><a class="headerlink" href="#subst2" title="Permalink to this headline">¶</a></h2>
+<p>用来替代列表中指定的两个S表达式</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; subst2: symbol symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subst2</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old1</span> <span class="nv">old2</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old1</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">old2</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">subst2</span> <span class="nv">new</span> <span class="nv">old1</span> <span class="nv">old2</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+
+<span class="c1">;subst2简化版本</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">subst2</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old1</span> <span class="nv">old2</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">eq? </span><span class="nv">old2</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+           <span class="p">(</span><span class="nb">eq? </span><span class="nv">old1</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)))</span>
+       <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span>
+                  <span class="p">(</span><span class="nf">subst2</span> <span class="nv">new</span> <span class="nv">old1</span> <span class="nv">old2</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">subst2&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old1</span> <span class="nv">old2</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="o">&#39;</span><span class="p">()))</span>
+      <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">eq? </span><span class="nv">old1</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+           <span class="p">(</span><span class="nb">eq? </span><span class="nv">old2</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)))</span>
+       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">subst&amp;co</span> <span class="nv">new</span>
+                      <span class="nv">old1</span>
+                      <span class="nv">old2</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multirember">
+<h2><a class="toc-backref" href="#id8">6.7. multirember</a><a class="headerlink" href="#multirember" title="Permalink to this headline">¶</a></h2>
+<p>基本同rember, 只不过是列表中所有符合的S表达式都会删除.</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; multirember: symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">multirember</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+      <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+      <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span> <span class="p">(</span><span class="nf">multirember</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">multirember</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre> <span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+   <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rmcount</span> <span class="nv">newlat</span><span class="p">)</span>
+     <span class="p">(</span><span class="nb">display </span><span class="nv">rmcount</span><span class="p">)</span>
+     <span class="p">(</span><span class="nb">display </span><span class="s">&quot; &quot;</span><span class="p">)</span>
+     <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+     <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">multirember&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">a</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">multirember&amp;co</span> <span class="nv">a</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rmcount</span> <span class="nv">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">rmcount</span> <span class="mi">1</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">multirember&amp;co</span> <span class="nv">a</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rmcount</span> <span class="nv">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="nv">rmcount</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiinsertr">
+<h2><a class="toc-backref" href="#id9">6.8. multiinsertR</a><a class="headerlink" href="#multiinsertr" title="Permalink to this headline">¶</a></h2>
+<p>基本同insertR，只不过是列表中所有符合的s表达式都会插入其右边。</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; multiinsertR: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">multiinsertR</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nf">multiinsertR</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">multiinsertR</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">inscount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">multiinsertR&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">multiinsertR&amp;co</span> <span class="nv">new</span>
+                         <span class="nv">old</span>
+                         <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                         <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                           <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">inscount</span> <span class="mi">1</span><span class="p">)</span>
+                                <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">newlat</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+        <span class="p">(</span><span class="nf">multiinsertR&amp;co</span> <span class="nv">new</span>
+                         <span class="nv">old</span>
+                         <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                         <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                           <span class="p">(</span><span class="nf">col</span> <span class="nv">inscount</span>
+                                <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiinsertl">
+<h2><a class="toc-backref" href="#id10">6.9. multiinsertL</a><a class="headerlink" href="#multiinsertl" title="Permalink to this headline">¶</a></h2>
+<p>基本同insertL, 只不过是列表中所有符合的s表达式都会插入其左边.</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; multiinsertL: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">multiinsertL</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="p">(</span><span class="nf">multiinsertL</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">multiinsertL</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">inscount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">mutlinsertL&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">mutlinsertL&amp;co</span> <span class="nv">new</span>
+                      <span class="nv">old</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">inscount</span> <span class="mi">1</span><span class="p">)</span>
+                             <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">old</span> <span class="nv">newlat</span><span class="p">))))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">mutlinsertL&amp;co</span> <span class="nv">new</span>
+                      <span class="nv">old</span>
+                      <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">col</span> <span class="nv">inscount</span>
+                             <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multisubst">
+<h2><a class="toc-backref" href="#id11">6.10. multisubst</a><a class="headerlink" href="#multisubst" title="Permalink to this headline">¶</a></h2>
+<p>基本同subst, 只不过是列表中所有符合的s表达式都替换</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="c1">; multisubst: symbol symbol lat -&gt; lat</span>
+<span class="p">(</span><span class="k">define </span><span class="nv">multisubst</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="p">(</span><span class="nf">multisubst</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">))))</span>
+     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">multisubst</span> <span class="nv">new</span> <span class="nv">old</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)))))))</span>
+</pre></div>
+</div>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="k">define </span><span class="nv">col</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">stcount</span> <span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">stcount</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">newlat</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+    <span class="nv">newlat</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">mutlsubst&amp;co</span>
+  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new</span> <span class="nv">old</span> <span class="nv">lat</span> <span class="nv">col</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">cond</span>
+     <span class="p">((</span><span class="nb">null? </span><span class="nv">lat</span><span class="p">)</span> <span class="p">(</span><span class="nf">col</span> <span class="mi">0</span> <span class="o">&#39;</span><span class="p">()))</span>
+     <span class="p">((</span><span class="nb">eq? </span><span class="nv">old</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">mutlisubst&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">inscount</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="p">(</span><span class="nb">cons </span><span class="nv">new</span> <span class="nv">newlat</span><span class="p">)))))</span>
+     <span class="p">(</span><span class="nf">else</span>
+      <span class="p">(</span><span class="nf">mutlisubst&amp;co</span> <span class="nv">new</span>
+                     <span class="nv">old</span>
+                     <span class="p">(</span><span class="nb">cdr </span><span class="nv">lat</span><span class="p">)</span>
+                     <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">inscount</span> <span class="nv">newlat</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">col</span> <span class="nv">inscount</span>
+                            <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">lat</span><span class="p">)</span> <span class="nv">newlat</span><span class="p">))))))))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">6. Cons the Magnificent</a><ul>
+<li><a class="reference internal" href="#rember">6.1. rember</a></li>
+<li><a class="reference internal" href="#firsts">6.2. firsts</a></li>
+<li><a class="reference internal" href="#insertr">6.3. insertR</a></li>
+<li><a class="reference internal" href="#insertl">6.4. insertL</a></li>
+<li><a class="reference internal" href="#subst">6.5. subst</a></li>
+<li><a class="reference internal" href="#subst2">6.6. subst2</a></li>
+<li><a class="reference internal" href="#multirember">6.7. multirember</a></li>
+<li><a class="reference internal" href="#multiinsertr">6.8. multiinsertR</a></li>
+<li><a class="reference internal" href="#multiinsertl">6.9. multiinsertL</a></li>
+<li><a class="reference internal" href="#multisubst">6.10. multisubst</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="chapter_02.html"
+                        title="previous chapter">5. Do It, Do It Again, and Again, and Again…</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="chapter_04.html"
+                        title="next chapter">7. Numbers Games</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/chapter_03.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chapter_04.html" title="7. Numbers Games"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chapter_02.html" title="5. Do It, Do It Again, and Again, and Again…"
+             >previous</a> |</li>
+        <li><a href="index.html">《The Little Schemer》笔记 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, JaunaryStar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
